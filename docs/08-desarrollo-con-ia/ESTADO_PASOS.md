@@ -95,8 +95,8 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 | PASO_S00_07 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | 10/10 smoke tests PASS — GATE 0 desbloqueado |
 | PASO_S00_SMOKE | sin HU directa | pendiente | EPIC-10 | No | DONE | ALL | 100% | Codex | develop | - | GATE 0 PASS: gateway, API health, ping, PG, Redis, MinIO, Prometheus, Grafana, tablas, Swagger |
 | PASO_S01_01 | HU-01-01<br>HU-01-03<br>HU-01-04<br>HU-01-05 | pendiente | EPIC-01 | Si | DONE | A | 100% | Codex | develop | - | Auth backend: JWT, BCrypt, register/login/refresh/logout/me, 11 unit tests |
-| PASO_S01_02 | HU-01-01<br>HU-01-02<br>HU-01-03<br>HU-01-05 | pendiente | EPIC-01 | Si | READY | B | 0% | - | develop | - | Implementar auth UI con mocks/back real |
-| PASO_S01_03 | HU-01-04 | pendiente | EPIC-01 | Si | TODO | B | 0% | - | - | Depende de PASO_S01_02 | Implementar app shell y guards |
+| PASO_S01_02 | HU-01-01<br>HU-01-02<br>HU-01-03<br>HU-01-05 | pendiente | EPIC-01 | Si | DONE | B | 100% | Codex | develop | - | AuthService, MockInterceptor, Login/Register/VerifyEmail components, auth.routes |
+| PASO_S01_03 | HU-01-04 | pendiente | EPIC-01 | Si | DONE | B | 100% | Codex | develop | - | AuthGuard, Sidebar, Topbar, MainLayout, 8 placeholder pages, app.routes con lazy loading |
 | PASO_S02_01 | HU-03-03 | pendiente | EPIC-03 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_05 | Implementar validacion de mazos |
 | PASO_S02_02 | HU-02-01<br>HU-02-02<br>HU-02-03 | pendiente | EPIC-02 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_05 | Implementar catalogo y seed de cartas |
 | PASO_S02_03 | HU-03-01<br>HU-03-04<br>HU-03-05<br>HU-03-06 | pendiente | EPIC-03 | Si | TODO | A | 0% | - | - | Depende de PASO_S02_01/PASO_S01_01/PASO_S02_02 | Implementar CRUD de mazos |

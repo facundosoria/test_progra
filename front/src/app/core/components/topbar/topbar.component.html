@@ -1,0 +1,33 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <h1 class="section-title">{{ currentSection }}</h1>
+  </div>
+
+  <div class="topbar-right">
+    <div class="coin-display">
+      <lucide-icon [img]="icons.Coins" [size]="16" class="coin-icon"></lucide-icon>
+      <span class="coin-count">{{ coins | number }}</span>
+    </div>
+
+    <button class="notif-btn" disabled title="Próximamente">
+      <span class="notif-dot"></span>
+    </button>
+
+    <div class="trainer-menu-wrap" *ngIf="currentUser$ | async as user">
+      <button class="trainer-btn" (click)="showUserMenu = !showUserMenu">
+        <div class="avatar">{{ user.username[0].toUpperCase() }}</div>
+        <span class="trainer-name">{{ user.username }}</span>
+      </button>
+
+      <div class="user-menu" *ngIf="showUserMenu">
+        <div class="user-menu-header">
+          <span class="user-email">{{ user.email }}</span>
+        </div>
+        <button class="user-menu-item" (click)="onLogout()">
+          <lucide-icon [img]="icons.LogOut" [size]="14"></lucide-icon>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

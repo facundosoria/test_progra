@@ -1,0 +1,41 @@
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">C</span>
+  </div>
+
+  <ul class="nav-list">
+    <li *ngFor="let item of navItems">
+      <a
+        [routerLink]="item.route"
+        class="nav-item"
+        [class.active]="isActive(item.route)"
+        [title]="item.label"
+      >
+        <lucide-icon [img]="item.icon" [size]="22"></lucide-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-bottom">
+    <ul class="nav-list">
+      <li *ngFor="let item of bottomItems">
+        <a
+          [routerLink]="item.route"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          [title]="item.label"
+        >
+          <lucide-icon [img]="item.icon" [size]="22"></lucide-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </li>
+      <li>
+        <button class="nav-item logout-btn" (click)="onLogout()" title="Salir">
+          <lucide-icon [img]="icons.LogOut" [size]="22"></lucide-icon>
+          <span class="nav-label">Salir</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
