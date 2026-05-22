@@ -86,8 +86,8 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 
 | Paso | HU | Issue HU | Epica | Requerido para Done | Estado | Equipo | Avance | Responsable | Ultimo commit/rama | Bloqueos | Proxima accion |
 | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| PASO_S00_01 | TT-10-01<br>TT-10-02<br>TT-10-03 | pendiente | EPIC-10 | Si | READY | ALL | 0% | - | - | - | Iniciar contratos API/WS y mocks base |
-| PASO_S00_02 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de PASO_S00_01 | Validar herramientas locales |
+| PASO_S00_01 | TT-10-01<br>TT-10-02<br>TT-10-03 | pendiente | EPIC-10 | Si | DONE | ALL | 100% | Codex | develop | - | Outputs existen: CONTRATOS_API.md, PROTOCOLO_WEBSOCKET.md, MOCKS_FRONTEND.md |
+| PASO_S00_02 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | Herramientas verificadas: Java 21, Maven, Node 20, Angular CLI, Docker |
 | PASO_S00_03 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de PASO_S00_02 | Configurar Docker Compose y gateway |
 | PASO_S00_04 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_03 | Crear proyecto Spring Boot |
 | PASO_S00_05 | TT-10-07 | pendiente | EPIC-10 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_04 | Crear migraciones y seeds base |

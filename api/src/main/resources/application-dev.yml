@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/codemon_db
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    com.codemon: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: DEBUG

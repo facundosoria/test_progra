@@ -154,7 +154,7 @@ services:
       - codemon_net
 
   minio_setup:
-    image: minio/mc:RELEASE.2024-09-16T17-22-28Z
+    image: minio/mc:latest
     container_name: codemon_minio_setup
     depends_on:
       minio:
