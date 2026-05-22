@@ -1,0 +1,100 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-text">Codemon TCG</span>
+    </div>
+
+    <h2 class="auth-title">Crear cuenta</h2>
+
+    <div *ngIf="errorMessage" class="auth-error">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-field">
+        <label for="username">Nombre de entrenador</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="Solo letras, números y _"
+          [class.invalid]="username.invalid && username.touched"
+          autocomplete="username"
+        />
+        <span class="field-error" *ngIf="username.invalid && username.touched">
+          <span *ngIf="username.errors?.['required']">El nombre es requerido.</span>
+          <span *ngIf="username.errors?.['minlength']">Mínimo 3 caracteres.</span>
+          <span *ngIf="username.errors?.['maxlength']">Máximo 20 caracteres.</span>
+          <span *ngIf="username.errors?.['pattern']">Solo letras, números y guión bajo.</span>
+        </span>
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="tu@email.com"
+          [class.invalid]="email.invalid && email.touched"
+          autocomplete="email"
+        />
+        <span class="field-error" *ngIf="email.invalid && email.touched">
+          <span *ngIf="email.errors?.['required']">El email es requerido.</span>
+          <span *ngIf="email.errors?.['email']">Email inválido.</span>
+        </span>
+      </div>
+
+      <div class="form-field">
+        <label for="password">Contraseña</label>
+        <div class="password-wrap">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            [class.invalid]="password.invalid && password.touched"
+            autocomplete="new-password"
+          />
+          <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+            {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <div class="strength-bar" *ngIf="password.value">
+          <div class="strength-track">
+            <div class="strength-fill" [ngClass]="strengthClass" [style.width.%]="passwordStrength * 25"></div>
+          </div>
+          <span class="strength-label" [ngClass]="strengthClass">{{ strengthLabel }}</span>
+        </div>
+        <span class="field-error" *ngIf="password.invalid && password.touched">
+          <span *ngIf="password.errors?.['required']">La contraseña es requerida.</span>
+          <span *ngIf="password.errors?.['minlength']">Mínimo 8 caracteres.</span>
+        </span>
+      </div>
+
+      <div class="form-field">
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input
+          id="confirmPassword"
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          placeholder="Repetí tu contraseña"
+          [class.invalid]="(confirmPassword.touched && form.errors?.['passwordMismatch'])"
+          autocomplete="new-password"
+        />
+        <span class="field-error" *ngIf="confirmPassword.touched && form.errors?.['passwordMismatch']">
+          Las contraseñas no coinciden.
+        </span>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">Crear cuenta</span>
+        <span *ngIf="loading">Registrando...</span>
+      </button>
+    </form>
+
+    <p class="auth-link">
+      ¿Ya tenés cuenta? <a routerLink="/auth/login">Iniciá sesión</a>
+    </p>
+  </div>
+</div>

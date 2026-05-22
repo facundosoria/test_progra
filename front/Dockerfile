@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copiar package.json primero para cachear node_modules
 COPY package*.json ./
-RUN npm install --silent
+RUN npm ci --legacy-peer-deps
 
 # Copiar código fuente y buildear en producción
 COPY . .
