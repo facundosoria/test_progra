@@ -88,14 +88,14 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
 | PASO_S00_01 | TT-10-01<br>TT-10-02<br>TT-10-03 | pendiente | EPIC-10 | Si | DONE | ALL | 100% | Codex | develop | - | Outputs existen: CONTRATOS_API.md, PROTOCOLO_WEBSOCKET.md, MOCKS_FRONTEND.md |
 | PASO_S00_02 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | Herramientas verificadas: Java 21, Maven, Node 20, Angular CLI, Docker |
-| PASO_S00_03 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de PASO_S00_02 | Configurar Docker Compose y gateway |
-| PASO_S00_04 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_03 | Crear proyecto Spring Boot |
-| PASO_S00_05 | TT-10-07 | pendiente | EPIC-10 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_04 | Crear migraciones y seeds base |
-| PASO_S00_06 | TT-10-03 | pendiente | EPIC-10 | Si | TODO | B | 0% | - | - | Depende de PASO_S00_03 | Crear proyecto Angular |
-| PASO_S00_07 | TT-10-05 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de PASO_S00_03 | Validar infraestructura local |
-| PASO_S00_SMOKE | sin HU directa | pendiente | EPIC-10 | No | TODO | ALL | 0% | - | - | Depende de S00 completo | Ejecutar GATE 0 de infraestructura |
-| PASO_S01_01 | HU-01-01<br>HU-01-03<br>HU-01-04<br>HU-01-05 | pendiente | EPIC-01 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_04/PASO_S00_05 | Implementar auth backend |
-| PASO_S01_02 | HU-01-01<br>HU-01-02<br>HU-01-03<br>HU-01-05 | pendiente | EPIC-01 | Si | TODO | B | 0% | - | - | Depende de PASO_S00_06 | Implementar auth UI con mocks/back real |
+| PASO_S00_03 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | Docker Compose levantado; .env creado; todos los servicios healthy |
+| PASO_S00_04 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | A | 100% | Codex | develop | - | pom.xml actualizado; application.yml/dev/prod creados; Dockerfile copiado |
+| PASO_S00_05 | TT-10-07 | pendiente | EPIC-10 | Si | DONE | A | 100% | Codex | develop | - | V1-V15 migraciones creadas; cards.json copiado a seed/; 28 tablas en BD |
+| PASO_S00_06 | TT-10-03 | pendiente | EPIC-10 | Si | DONE | B | 100% | Codex | develop | - | Tailwind CSS 3 + STOMP + Lucide + FA instalados; environments creados; estructura de features lista |
+| PASO_S00_07 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | 10/10 smoke tests PASS — GATE 0 desbloqueado |
+| PASO_S00_SMOKE | sin HU directa | pendiente | EPIC-10 | No | DONE | ALL | 100% | Codex | develop | - | GATE 0 PASS: gateway, API health, ping, PG, Redis, MinIO, Prometheus, Grafana, tablas, Swagger |
+| PASO_S01_01 | HU-01-01<br>HU-01-03<br>HU-01-04<br>HU-01-05 | pendiente | EPIC-01 | Si | READY | A | 0% | - | develop | - | Implementar auth backend |
+| PASO_S01_02 | HU-01-01<br>HU-01-02<br>HU-01-03<br>HU-01-05 | pendiente | EPIC-01 | Si | READY | B | 0% | - | develop | - | Implementar auth UI con mocks/back real |
 | PASO_S01_03 | HU-01-04 | pendiente | EPIC-01 | Si | TODO | B | 0% | - | - | Depende de PASO_S01_02 | Implementar app shell y guards |
 | PASO_S02_01 | HU-03-03 | pendiente | EPIC-03 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_05 | Implementar validacion de mazos |
 | PASO_S02_02 | HU-02-01<br>HU-02-02<br>HU-02-03 | pendiente | EPIC-02 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_05 | Implementar catalogo y seed de cartas |
@@ -122,7 +122,7 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 | PASO_S07_SMOKE | sin HU directa | pendiente | - | No | TODO | ALL | 0% | - | - | Depende de S07 completo | Ejecutar GATE 3/4 PvP |
 | PASO_S08_01 | HU-02-04<br>HU-07-03<br>HU-07-04<br>HU-07-05 | pendiente | EPIC-02<br>EPIC-07 | Si | TODO | C | 0% | - | - | Depende de PASO_S02_02/PASO_S01_01/PASO_S00_03 | Implementar sobres y coleccion |
 | PASO_S08_02 | HU-02-05<br>HU-09-05<br>HU-09-06 | pendiente | EPIC-02<br>EPIC-09 | Si | TODO | C | 0% | - | - | Depende de PASO_S08_01 | Implementar stats/leaderboard base |
-| PASO_S08_03 | HU-01-02<br>HU-01-06 | pendiente | EPIC-01 | Si | TODO | C | 0% | - | - | Depende de PASO_S01_01 | Implementar email/2FA |
+| PASO_S08_03 | HU-01-02<br>HU-01-06 | pendiente | EPIC-01 | Si | TODO | C | 0% | - | - | Depende de PASO_S01_01 — marcar READY cuando S01_01 este DONE | Implementar email/2FA |
 | PASO_S08_04 | HU-07-01<br>HU-07-02<br>HU-07-06 | pendiente | EPIC-07 | Si | TODO | C | 0% | - | - | Depende de PASO_S08_01/PASO_S01_01 | Implementar Mercado Pago y wallet |
 | PASO_S08_05 | TT-10-12 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de infra y servicios metricados | Implementar Prometheus/Grafana |
 | PASO_S08_06 | HU-07-01<br>HU-07-03<br>HU-07-04<br>HU-07-05 | pendiente | EPIC-07 | Si | TODO | B | 0% | - | - | Depende de PASO_S06_01/PASO_S08_04 | Implementar shop UI |
