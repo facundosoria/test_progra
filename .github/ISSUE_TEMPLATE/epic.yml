@@ -1,0 +1,52 @@
+name: "📦 Épica"
+description: "Agrupación funcional de historias de usuario"
+labels: ["epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Épica
+        > Agrupa historias de usuario relacionadas por funcionalidad.
+  - type: input
+    id: epic-id
+    attributes:
+      label: "ID de Épica"
+      placeholder: "EPIC-01"
+    validations:
+      required: true
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: "Descripción"
+      placeholder: "¿Qué funcionalidad cubre esta épica y por qué es importante?"
+    validations:
+      required: true
+  - type: textarea
+    id: historias
+    attributes:
+      label: "Historias de Usuario incluidas"
+      description: "Lista las HU. Se actualizará con links a Issues una vez creados."
+      placeholder: "- [ ] HU-XX-01 Nombre\n- [ ] HU-XX-02 Nombre"
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: "Prioridad"
+      options: ["Alta", "Media", "Baja"]
+    validations:
+      required: true
+  - type: dropdown
+    id: equipo
+    attributes:
+      label: "Equipo principal"
+      options: ["Equipo A", "Equipo B", "Equipo C", "All"]
+    validations:
+      required: true
+  - type: input
+    id: sprints
+    attributes:
+      label: "Sprints"
+      placeholder: "S1, S2"
+    validations:
+      required: true

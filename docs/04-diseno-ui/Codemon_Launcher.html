@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codemon — Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-panel: #0f0f1a;
+      --bg-panel2: #13131f;
+      --bg-card: #161622;
+      --gold: #c9a227;
+      --gold-light: #e8c547;
+      --gold-dim: #8a6e1a;
+      --text-primary: #f0e8d0;
+      --text-secondary: #8a8090;
+      --text-dim: #4a4456;
+      --border: rgba(201,162,39,0.15);
+      --border-hover: rgba(201,162,39,0.4);
+      --sidebar-w: 72px;
+      --topbar-h: 56px;
+    }
+
+    html, body { height: 100%; background: var(--bg-deep); font-family: 'Nunito', sans-serif; color: var(--text-primary); overflow: hidden; }
+    #root { height: 100%; display: flex; flex-direction: column; }
+
+    /* ── Canvas BG ── */
+    #bgCanvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
+
+    /* ── Layout ── */
+    .layout { position: relative; z-index: 1; display: flex; height: 100%; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: rgba(10,10,15,0.85);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      gap: 4px;
+      backdrop-filter: blur(20px);
+      z-index: 10;
+    }
+
+    .sidebar-logo {
+      width: 40px; height: 40px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 8px rgba(201,162,39,0.5));
+    }
+
+    .sidebar-divider {
+      width: 32px; height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    .nav-btn {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+    .nav-btn.active { color: var(--gold); background: rgba(201,162,39,0.1); }
+    .nav-btn.active::before {
+      content: '';
+      position: absolute;
+      left: -1px; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 24px;
+      background: var(--gold);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-label {
+      font-family: 'Cinzel', serif;
+      font-size: 7px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+    /* ── Main area ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: var(--topbar-h);
+      background: rgba(10,10,15,0.7);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 14px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.06em;
+    }
+
+    .topbar-sep { flex: 1; }
+
+    .trainer-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .trainer-chip:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.06); }
+
+    .trainer-menu-wrap { position: relative; }
+    .trainer-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: rgba(13,13,22,0.97);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      min-width: 180px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      animation: fadeUp 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-size: 13px;
+      color: var(--text-secondary); cursor: pointer;
+      transition: all 0.15s; border: none; background: none; width: 100%;
+      text-align: left;
+    }
+    .menu-item:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+    .menu-item.danger:hover { background: rgba(244,63,94,0.1); color: #f43f5e; }
+    .dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+    .trainer-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(201,162,39,0.3), rgba(124,58,237,0.3));
+      border: 1px solid var(--gold-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+
+    .trainer-info { display: flex; flex-direction: column; gap: 1px; }
+    .trainer-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; color: var(--text-primary); }
+    .trainer-rank { font-size: 10px; color: var(--gold-dim); }
+
+    .coin-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 6px 6px 10px;
+      background: rgba(201,162,39,0.07);
+      border: 1px solid rgba(201,162,39,0.25);
+      border-radius: 999px;
+      cursor: default;
+      transition: all 0.2s;
+    }
+    .coin-counter:hover { border-color: rgba(201,162,39,0.5); background: rgba(201,162,39,0.1); }
+    .coin-icon { display: flex; align-items: center; filter: drop-shadow(0 0 4px rgba(201,162,39,0.5)); }
+    .coin-amount {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      min-width: 52px;
+    }
+    .coin-add {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,162,39,0.4);
+      background: rgba(201,162,39,0.12);
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+    .coin-add:hover { background: rgba(201,162,39,0.25); border-color: var(--gold); }
+
+    .topbar-notif {
+      position: relative;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .topbar-notif:hover { border-color: var(--border-hover); color: var(--text-primary); }
+    .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--error, #f43f5e);
+      border: 1.5px solid var(--bg-deep);
+    }
+
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.2); border-radius: 2px; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      height: 340px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 70% 50%, rgba(201,162,39,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 20% 40%, rgba(124,58,237,0.1) 0%, transparent 50%),
+        linear-gradient(180deg, transparent 50%, rgba(10,10,15,0.9) 100%);
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 32px;
+      gap: 16px;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #fff 0%, var(--gold-light) 40%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 16px rgba(201,162,39,0.3));
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 400px;
+    }
+
+    .hero-actions { display: flex; align-items: center; gap: 12px; }
+
+    .play-btn {
+      position: relative;
+      padding: 14px 40px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #b8891f 0%, #c9a227 40%, #e8c547 70%, #c9a227 100%);
+      background-size: 200% auto;
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #0a0a0f;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 30px rgba(201,162,39,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+      text-transform: uppercase;
+      animation: pulsePlay 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulsePlay {
+      0%, 100% { box-shadow: 0 6px 30px rgba(201,162,39,0.4), inset 0 1px 0 rgba(255,255,255,0.15); }
+      50% { box-shadow: 0 8px 40px rgba(201,162,39,0.65), inset 0 1px 0 rgba(255,255,255,0.15); }
+    }
+
+    .play-btn:hover { background-position: right center; transform: translateY(-2px); }
+    .play-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .play-btn:hover::after { transform: translateX(100%); }
+
+    .play-btn-inner { display: flex; align-items: center; gap: 8px; }
+
+    .update-badge {
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .update-badge span { color: var(--gold); font-weight: 700; }
+
+    /* Hero decorative Pokemon silhouettes */
+    .hero-poke {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.12;
+      filter: drop-shadow(0 0 30px rgba(201,162,39,0.3));
+      animation: heroFloat 5s ease-in-out infinite;
+    }
+    @keyframes heroFloat {
+      0%,100% { transform: translateY(-50%) translateY(0); }
+      50% { transform: translateY(-50%) translateY(-12px); }
+    }
+
+    /* ── Panel grid ── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 0;
+      padding: 24px;
+      padding-top: 20px;
+      gap: 20px;
+    }
+
+    .panel-left { display: flex; flex-direction: column; gap: 20px; }
+    .panel-right { display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Section titles ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    .section-link {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--gold-dim);
+      cursor: pointer;
+      text-transform: uppercase;
+      border: none; background: none;
+      transition: color 0.2s;
+    }
+    .section-link:hover { color: var(--gold-light); }
+
+    /* ── News cards ── */
+    .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .news-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .news-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+
+    .news-card-img {
+      height: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .news-card-body { padding: 12px; }
+    .news-tag {
+      display: inline-block;
+      font-family: 'Cinzel', serif;
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .tag-event { background: rgba(244,63,94,0.15); color: #f43f5e; }
+    .tag-update { background: rgba(201,162,39,0.15); color: var(--gold); }
+    .tag-new { background: rgba(16,185,129,0.15); color: #10b981; }
+    .tag-meta { background: rgba(14,165,233,0.15); color: #0ea5e9; }
+
+    .news-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .news-card-date { font-size: 10px; color: var(--text-dim); }
+
+    /* ── Stats row ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-hover); }
+
+    .stat-icon { font-size: 20px; }
+    .stat-value {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .stat-label { font-size: 11px; color: var(--text-secondary); }
+
+    /* ── Collection preview ── */
+    .card-row { display: flex; gap: 10px; overflow: hidden; }
+
+    .mini-card {
+      flex-shrink: 0;
+      width: 68px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .mini-card:hover { border-color: var(--border-hover); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+    .mini-card-inner {
+      aspect-ratio: 2/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-card-rarity {
+      position: absolute; bottom: 4px; right: 4px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Right panel: Rankings ── */
+    .rank-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .rank-item:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.03); }
+
+    .rank-num {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .rank-1 { color: #ffd700; }
+    .rank-2 { color: #c0c0c0; }
+    .rank-3 { color: #cd7f32; }
+    .rank-other { color: var(--text-dim); }
+
+    .rank-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; color: var(--text-primary); }
+    .rank-pts { font-size: 10px; color: var(--text-dim); }
+    .rank-badge {
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    /* ── Friends ── */
+    .friends-list { display: flex; flex-direction: column; gap: 8px; }
+    .friend-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .friend-item:hover { border-color: var(--border-hover); }
+    .friend-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+      border: 1px solid var(--border); position: relative;
+    }
+    .online-dot {
+      position: absolute; bottom: 0; right: 0;
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--bg-deep);
+    }
+    .dot-online { background: #10b981; }
+    .dot-away { background: #eab308; }
+    .dot-offline { background: var(--text-dim); }
+    .friend-info { flex: 1; }
+    .friend-name { font-family: 'Cinzel', serif; font-size: 11px; color: var(--text-primary); }
+    .friend-status { font-size: 10px; color: var(--text-dim); }
+    .friend-btn {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      font-size: 10px;
+      font-family: 'Cinzel', serif;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .friend-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* Panel card wrapper */
+    .panel-card {
+      background: rgba(10,10,15,0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    /* Holo card img placeholder */
+    .card-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes shimmerCard {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* Active section panels */
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    /* Settings panel */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .setting-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .setting-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+    .setting-toggle {
+      width: 44px; height: 24px; border-radius: 999px;
+      border: none; cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      position: relative; transition: background 0.2s;
+    }
+    .setting-toggle.on { background: var(--gold-dim); }
+    .setting-toggle i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .setting-toggle.on i { transform: translateX(20px); }
+
+    /* Slide-in panels for nav */
+    .full-panel {
+      position: absolute; inset: 0;
+      background: rgba(10,10,15,0.97);
+      backdrop-filter: blur(24px);
+      z-index: 20;
+      padding: 32px;
+      overflow-y: auto;
+      animation: slideIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    .full-panel-head {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 28px;
+    }
+    .full-panel-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 22px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .close-panel-btn {
+      margin-left: auto;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .close-panel-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+    /* Collection grid */
+    .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
+    .coll-card {
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.25s;
+      position: relative;
+    }
+    .coll-card:hover { border-color: var(--border-hover); transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.5); }
+    .coll-card-face {
+      aspect-ratio: 2/3;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px; font-size: 28px;
+    }
+    .coll-card-name { font-family: 'Cinzel', serif; font-size: 9px; text-align: center; padding: 6px 4px; color: var(--text-secondary); background: rgba(0,0,0,0.4); }
+
+    /* Shop items */
+    .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 16px; }
+    .shop-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .shop-item:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+    .shop-item-img {
+      height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      position: relative;
+    }
+    .shop-item-body { padding: 12px; }
+    .shop-item-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .shop-item-price {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; color: var(--gold);
+    }
+    .shop-buy-btn {
+      margin-top: 8px; width: 100%;
+      padding: 7px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; color: #0a0a0f; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .shop-buy-btn:hover { filter: brightness(1.1); }
+
+    /* Tweak panel inline styles */
+    .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;background:rgba(250,249,247,.78);color:#29261b;-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+    .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none}
+    .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+    .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+    .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+    .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+    .twk-row{display:flex;flex-direction:column;gap:5px}
+    .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+    .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
+    .twk-lbl>span:first-child{font-weight:500}
+    .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.45);padding:10px 0 0}
+    .twk-sect:first-child{padding-top:0}
+    .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.06);user-select:none}
+    .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+    .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2}
+    .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0;flex-shrink:0}
+    .twk-toggle[data-on="1"]{background:#34c759}
+    .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+    .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+    .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;background:transparent;flex-shrink:0}
+    .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+    .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  </style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div id="root"></div>
+
+<!-- Animated background -->
+<script>
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  const SHAPES = [
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.ellipse(0,8,12,14,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(-8,-4);ctx.lineTo(-14,-18);ctx.lineTo(-2,-8);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(8,-4);ctx.lineTo(14,-18);ctx.lineTo(2,-8);ctx.closePath();ctx.fill();ctx.beginPath();ctx.ellipse(0,-4,10,10,0,0,Math.PI*2);ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.moveTo(0,-16);ctx.bezierCurveTo(10,-16,18,-8,18,0);ctx.bezierCurveTo(18,8,12,14,6,14);ctx.lineTo(10,20);ctx.lineTo(3,14);ctx.lineTo(0,20);ctx.lineTo(-3,14);ctx.lineTo(-10,20);ctx.lineTo(-6,14);ctx.bezierCurveTo(-12,14,-18,8,-18,0);ctx.bezierCurveTo(-18,-8,-10,-16,0,-16);ctx.closePath();ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.ellipse(18,-2,10,7,0.4,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(0,6,11,13,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(0,-6,9,9,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(-5,-12);ctx.lineTo(-10,-22);ctx.lineTo(0,-14);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(5,-12);ctx.lineTo(10,-22);ctx.lineTo(0,-14);ctx.closePath();ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.moveTo(0,-14);ctx.bezierCurveTo(8,-14,16,-6,14,4);ctx.bezierCurveTo(12,12,6,16,0,16);ctx.bezierCurveTo(-6,16,-14,10,-14,2);ctx.bezierCurveTo(-14,-8,-8,-14,0,-14);ctx.closePath();ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.lineWidth=2;ctx.strokeStyle=ctx.fillStyle;ctx.beginPath();ctx.arc(0,0,16,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(-16,0);ctx.lineTo(16,0);ctx.stroke();ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.stroke();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.ellipse(0,6,18,20,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(0,-12,11,10,0,0,Math.PI*2);ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.moveTo(0,-16);ctx.bezierCurveTo(10,-16,18,-8,18,0);ctx.bezierCurveTo(18,8,12,14,6,14);ctx.lineTo(10,20);ctx.lineTo(3,14);ctx.lineTo(0,20);ctx.lineTo(-3,14);ctx.lineTo(-10,20);ctx.lineTo(-6,14);ctx.bezierCurveTo(-12,14,-18,8,-18,0);ctx.bezierCurveTo(-18,-8,-10,-16,0,-16);ctx.closePath();ctx.fill();},
+    function(ctx,s){ctx.scale(s,s);ctx.beginPath();ctx.moveTo(0,-16);ctx.bezierCurveTo(8,-16,14,-10,12,0);ctx.bezierCurveTo(10,8,4,14,-2,16);ctx.bezierCurveTo(-8,16,-14,8,-12,-2);ctx.bezierCurveTo(-10,-12,-8,-16,0,-16);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(-6,-17);ctx.lineTo(-10,-26);ctx.lineTo(-1,-18);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(6,-17);ctx.lineTo(10,-26);ctx.lineTo(1,-18);ctx.closePath();ctx.fill();},
+  ];
+
+  const TC = [[201,162,39],[244,63,94],[14,165,233],[124,58,237],[16,185,129],[234,179,8],[251,146,60],[99,102,241]];
+  const rnd = (a,b) => Math.random()*(b-a)+a;
+  const rc = () => TC[Math.floor(Math.random()*TC.length)];
+
+  const W = () => canvas.width, H = () => canvas.height;
+
+  // Stars
+  const stars = Array.from({length:100},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:rnd(0.2,1.4),a:rnd(0.05,0.3),tw:Math.random()*Math.PI*2,ts:rnd(0.005,0.025),c:rc()}));
+
+  // Cards
+  const cards = Array.from({length:18},()=>mkCard(true));
+  function mkCard(ini){const c=rc(),side=Math.random()>.5,cw=rnd(24,52),ch=cw*1.4;return{x:ini?Math.random()*window.innerWidth:(side?-cw:window.innerWidth+cw),y:ini?Math.random()*window.innerHeight:Math.random()*window.innerHeight,w:cw,h:ch,vx:ini?(Math.random()-.5)*.25:(side?1:-1)*rnd(.05,.35),vy:(Math.random()-.5)*.18,rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.005,c,a:rnd(.04,.18),pu:Math.random()*Math.PI*2,ps:rnd(.005,.018),ho:Math.random()*Math.PI*2};}
+
+  // Silhouettes
+  const silos = Array.from({length:20},(_,i)=>mkSilo(true,i));
+  function mkSilo(ini,idx){const c=rc(),side=Math.random()>.5;return{x:ini?Math.random()*window.innerWidth:(side?-80:window.innerWidth+80),y:ini?Math.random()*window.innerHeight:Math.random()*window.innerHeight,vx:ini?(Math.random()-.5)*.2:(side?1:-1)*rnd(.05,.25),vy:(Math.random()-.5)*.14,sc:rnd(.5,2),rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.005,sh:Math.floor(Math.random()*SHAPES.length),c,a:rnd(.04,.2),pu:Math.random()*Math.PI*2,ps:rnd(.008,.025)};}
+
+  // Particles
+  const parts = Array.from({length:150},()=>mkPart(true));
+  function mkPart(ini){const c=rc();return{x:ini?Math.random()*window.innerWidth:Math.random()*window.innerWidth,y:ini?Math.random()*window.innerHeight:window.innerHeight+10,vx:(Math.random()-.5)*.55,vy:-rnd(.1,.9),r:rnd(.4,3.2),c,a:rnd(.15,.55),li:ini?Math.random():0,ml:rnd(.5,.9),tw:Math.random()*Math.PI*2,ts:rnd(.01,.06),trail:Math.random()>.65,hist:[]};}
+
+  // Orbs
+  const orbs = Array.from({length:16},()=>mkOrb(true));
+  function mkOrb(ini){const c=rc();return{x:ini?Math.random()*window.innerWidth:(Math.random()>.5?-40:window.innerWidth+40),y:ini?Math.random()*window.innerHeight:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:rnd(10,32),c,a:rnd(.02,.12),pu:Math.random()*Math.PI*2,ps:rnd(.005,.02)};}
+
+  // Beams
+  const beams = Array.from({length:8},()=>mkBeam());
+  function mkBeam(){const c=rc();return{x1:Math.random()*window.innerWidth,y1:Math.random()*window.innerHeight,x2:Math.random()*window.innerWidth,y2:Math.random()*window.innerHeight,vx1:(Math.random()-.5)*.5,vy1:(Math.random()-.5)*.5,vx2:(Math.random()-.5)*.5,vy2:(Math.random()-.5)*.5,c,a:rnd(.02,.1),pu:Math.random()*Math.PI*2,ps:rnd(.01,.04),li:Math.random(),ml:rnd(.4,.7)};}
+
+  // Shooting stars
+  const shoots = Array.from({length:6},()=>mkShoot(true));
+  function mkShoot(ini){const c=rc();return{x:ini?Math.random()*window.innerWidth:-20,y:ini?Math.random()*window.innerHeight*.5:Math.random()*window.innerHeight*.4,vx:rnd(2.5,5.5),vy:rnd(.4,1.8),len:rnd(40,90),c,a:0,li:ini?Math.random():0,ml:rnd(.1,.35),delay:ini?Math.random():rnd(.1,1)};}
+
+  let frame=0;
+  function draw(){
+    frame++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const cw=canvas.width,ch=canvas.height;
+
+    // Stars
+    stars.forEach(s=>{s.tw+=s.ts;const a=s.a*(0.5+0.5*Math.sin(s.tw));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(${s.c[0]},${s.c[1]},${s.c[2]},${a})`;ctx.fill();});
+
+    // Beams
+    beams.forEach((b,i)=>{b.li+=.004;b.pu+=b.ps;b.x1+=b.vx1;b.y1+=b.vy1;b.x2+=b.vx2;b.y2+=b.vy2;if(b.x1<0||b.x1>cw)b.vx1*=-1;if(b.y1<0||b.y1>ch)b.vy1*=-1;if(b.x2<0||b.x2>cw)b.vx2*=-1;if(b.y2<0||b.y2>ch)b.vy2*=-1;if(b.li>b.ml){beams[i]=mkBeam();return;}const lr=b.li/b.ml;const fade=lr<.15?lr/.15:lr>.75?(1-lr)/.25:1;const pa=b.a*fade*(0.6+0.4*Math.sin(b.pu));const g=ctx.createLinearGradient(b.x1,b.y1,b.x2,b.y2);g.addColorStop(0,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},0)`);g.addColorStop(.5,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${pa})`);g.addColorStop(1,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},0)`);ctx.beginPath();ctx.moveTo(b.x1,b.y1);ctx.lineTo(b.x2,b.y2);ctx.strokeStyle=g;ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(b.x1,b.y1,2.5,0,Math.PI*2);ctx.fillStyle=`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${pa*1.5})`;ctx.fill();ctx.beginPath();ctx.arc(b.x2,b.y2,2.5,0,Math.PI*2);ctx.fill();});
+
+    // Orbs
+    orbs.forEach((o,i)=>{o.pu+=o.ps;o.x+=o.vx;o.y+=o.vy;if(o.x<-80||o.x>cw+80||o.y<-80||o.y>ch+80){orbs[i]=mkOrb(false);return;}const pa=o.a*(0.7+0.3*Math.sin(o.pu));const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);g.addColorStop(0,`rgba(${o.c[0]},${o.c[1]},${o.c[2]},${pa*2})`);g.addColorStop(.4,`rgba(${o.c[0]},${o.c[1]},${o.c[2]},${pa})`);g.addColorStop(1,`rgba(${o.c[0]},${o.c[1]},${o.c[2]},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();});
+
+    // Cards
+    cards.forEach((c,i)=>{c.pu+=c.ps;c.rot+=c.rs;c.x+=c.vx;c.y+=c.vy;if(c.x<-120||c.x>cw+120||c.y<-120||c.y>ch+120){cards[i]=mkCard(false);return;}const pa=c.a*(0.8+0.2*Math.sin(c.pu));ctx.save();ctx.globalAlpha=pa;ctx.translate(c.x,c.y);ctx.rotate(c.rot);const hw=c.w/2,hh=c.h/2;ctx.beginPath();ctx.roundRect(-hw,-hh,c.w,c.h,3);ctx.fillStyle=`rgba(${c.c[0]},${c.c[1]},${c.c[2]},0.06)`;ctx.fill();ctx.strokeStyle=`rgba(${c.c[0]},${c.c[1]},${c.c[2]},0.4)`;ctx.lineWidth=0.8;ctx.stroke();ctx.strokeStyle=`rgba(${c.c[0]},${c.c[1]},${c.c[2]},0.15)`;ctx.lineWidth=0.5;ctx.beginPath();ctx.roundRect(-hw+3,-hh+3,c.w-6,c.h-6,2);ctx.stroke();const sx=-hw+((frame*.5+c.ho*50)%(c.w+20))-10;const sg=ctx.createLinearGradient(sx,-hh,sx+8,hh);sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,`rgba(${c.c[0]},${c.c[1]},${c.c[2]},0.3)`);sg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=sg;ctx.fillRect(-hw,-hh,c.w,c.h);ctx.restore();});
+
+    // Silhouettes
+    silos.forEach((s,i)=>{s.pu+=s.ps;s.rot+=s.rs;s.x+=s.vx;s.y+=s.vy;if(s.x<-150||s.x>cw+150||s.y<-150||s.y>ch+150){silos[i]=mkSilo(false,i);return;}const pa=s.a*(0.8+0.2*Math.sin(s.pu));const gr=50*s.sc;const gg=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,gr);gg.addColorStop(0,`rgba(${s.c[0]},${s.c[1]},${s.c[2]},${pa*.4})`);gg.addColorStop(1,`rgba(${s.c[0]},${s.c[1]},${s.c[2]},0)`);ctx.fillStyle=gg;ctx.beginPath();ctx.arc(s.x,s.y,gr,0,Math.PI*2);ctx.fill();ctx.save();ctx.globalAlpha=pa;ctx.translate(s.x,s.y);ctx.rotate(s.rot);ctx.fillStyle=`rgb(${s.c[0]},${s.c[1]},${s.c[2]})`;ctx.strokeStyle=`rgb(${s.c[0]},${s.c[1]},${s.c[2]})`;ctx.save();SHAPES[s.sh](ctx,s.sc);ctx.restore();ctx.restore();});
+
+    // Shoots
+    shoots.forEach((s,i)=>{if(s.delay>0){s.delay-=.008;return;}s.li+=.012;s.x+=s.vx;s.y+=s.vy;if(s.li>s.ml||s.x>cw+40){shoots[i]=mkShoot(false);return;}const lr=s.li/s.ml;const a=lr<.2?lr/.2:lr>.7?(1-lr)/.3:1;const g=ctx.createLinearGradient(s.x-s.len,s.y-s.vy*s.len/s.vx,s.x,s.y);g.addColorStop(0,`rgba(${s.c[0]},${s.c[1]},${s.c[2]},0)`);g.addColorStop(1,`rgba(${s.c[0]},${s.c[1]},${s.c[2]},${a*.7})`);ctx.beginPath();ctx.moveTo(s.x-s.len,s.y-s.vy*s.len/s.vx);ctx.lineTo(s.x,s.y);ctx.strokeStyle=g;ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(s.x,s.y,1.5,0,Math.PI*2);ctx.fillStyle=`rgba(${s.c[0]},${s.c[1]},${s.c[2]},${a*.9})`;ctx.fill();});
+
+    // Particles
+    parts.forEach((p,i)=>{p.li+=.004;p.tw+=p.ts;p.x+=p.vx;p.y+=p.vy;if(p.trail){p.hist.push({x:p.x,y:p.y});if(p.hist.length>8)p.hist.shift();}if(p.li>p.ml||p.y<-10){parts[i]=mkPart(false);return;}const lr=p.li/p.ml;const fade=lr<.1?lr*10:lr>.8?(1-lr)*5:1;const ta=p.a*fade*(0.5+0.5*Math.sin(p.tw));if(p.trail&&p.hist.length>1){for(let j=1;j<p.hist.length;j++){const t=j/p.hist.length;ctx.beginPath();ctx.moveTo(p.hist[j-1].x,p.hist[j-1].y);ctx.lineTo(p.hist[j].x,p.hist[j].y);ctx.strokeStyle=`rgba(${p.c[0]},${p.c[1]},${p.c[2]},${ta*t*.4})`;ctx.lineWidth=p.r*t;ctx.stroke();}}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c[0]},${p.c[1]},${p.c[2]},${ta})`;ctx.fill();if(p.r>2){const len=p.r*4;ctx.strokeStyle=`rgba(${p.c[0]},${p.c[1]},${p.c[2]},${ta*.4})`;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(p.x-len,p.y);ctx.lineTo(p.x+len,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y-len);ctx.lineTo(p.x,p.y+len);ctx.stroke();}});
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Tweaks ────────────────────────────────────────────────────────────────
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((k, v) => {
+    const edits = typeof k === 'object' ? k : { [k]: v };
+    setValues(prev => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title='Tweaks', children }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const off = useRef({ x:16, y:16 });
+  useEffect(() => {
+    const h = e => { const t=e?.data?.type; if(t==='__activate_edit_mode')setOpen(true); else if(t==='__deactivate_edit_mode')setOpen(false); };
+    window.addEventListener('message', h);
+    window.parent.postMessage({ type:'__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', h);
+  }, []);
+  const dismiss = () => { setOpen(false); window.parent.postMessage({ type:'__edit_mode_dismissed' }, '*'); };
+  const drag = e => {
+    const r=ref.current.getBoundingClientRect();
+    const sx=e.clientX,sy=e.clientY,sr=window.innerWidth-r.right,sb=window.innerHeight-r.bottom;
+    const mv=ev=>{off.current={x:sr-(ev.clientX-sx),y:sb-(ev.clientY-sy)};ref.current.style.right=off.current.x+'px';ref.current.style.bottom=off.current.y+'px';};
+    const up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};
+    window.addEventListener('mousemove',mv); window.addEventListener('mouseup',up);
+  };
+  if (!open) return null;
+  return (
+    <div ref={ref} className="twk-panel" style={{right:off.current.x,bottom:off.current.y}}>
+      <div className="twk-hd" onMouseDown={drag}><b>{title}</b><button className="twk-x" onMouseDown={e=>e.stopPropagation()} onClick={dismiss}>✕</button></div>
+      <div className="twk-body">{children}</div>
+    </div>
+  );
+}
+function TwkSection({title,children}){return <><div className="twk-sect">{title}</div>{children}</>;}
+function TwkRow({label,children}){return <div className="twk-row twk-row-h"><div className="twk-lbl"><span>{label}</span></div>{children}</div>;}
+function TwkToggle({label,tweakKey,tweaks,setTweak}){const v=tweaks[tweakKey];return <TwkRow label={label}><button type="button" className="twk-toggle" data-on={v?'1':'0'} onClick={()=>setTweak(tweakKey,!v)}><i/></button></TwkRow>;}
+function TwkColor({label,tweakKey,tweaks,setTweak}){return <TwkRow label={label}><input type="color" className="twk-swatch" value={tweaks[tweakKey]} onChange={e=>setTweak(tweakKey,e.target.value)}/></TwkRow>;}
+function TwkRadio({label,tweakKey,tweaks,setTweak,options}){
+  const ref=useRef(null);const [drag,setDrag]=useState(false);
+  const v=tweaks[tweakKey];const opts=options.map(o=>typeof o==='object'?o:{value:o,label:o});
+  const idx=Math.max(0,opts.findIndex(o=>o.value===v));const n=opts.length;const vRef=useRef(v);vRef.current=v;
+  const segAt=cx=>{const r=ref.current.getBoundingClientRect();const i=Math.floor(((cx-r.left-2)/(r.width-4))*n);return opts[Math.max(0,Math.min(n-1,i))].value;};
+  const pd=e=>{setDrag(true);const v0=segAt(e.clientX);if(v0!==vRef.current)setTweak(tweakKey,v0);const mv=ev=>{if(!ref.current)return;const vv=segAt(ev.clientX);if(vv!==vRef.current)setTweak(tweakKey,vv);};const up=()=>{setDrag(false);window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);};window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);};
+  return <div className="twk-row"><div className="twk-lbl"><span>{label}</span></div><div ref={ref} className={drag?'twk-seg dragging':'twk-seg'} onPointerDown={pd}><div className="twk-seg-thumb" style={{left:`calc(2px + ${idx} * (100% - 4px) / ${n})`,width:`calc((100% - 4px) / ${n})`}}/>{opts.map(o=><button key={o.value} type="button">{o.label}</button>)}</div></div>;
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────────
+const Ico = ({d,s=18}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d}/></svg>;
+const IcoPlay = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
+const IcoHome = () => <Ico d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"/>;
+const IcoCards = () => <Ico d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>;
+const IcoShop = () => <Ico d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0"/>;
+const IcoRank = () => <Ico d="M18 20V10 M12 20V4 M6 20v-6"/>;
+const IcoFriends = () => <Ico d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"/>;
+const IcoSettings = () => <Ico d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>;
+const IcoProfile = () => <Ico d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8"/>;
+const IcoBell = () => <Ico d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0"/>;
+const IcoNews = () => <Ico d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2 M18 14h-8 M15 18h-5 M10 6h8v4h-8z"/>;
+
+// ── PokeballLogo ─────────────────────────────────────────────────────────
+const PBLogo = ({size=40}) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="30" stroke="#c9a227" strokeWidth="1.5" opacity="0.7"/>
+    <path d="M2 32 Q2 2 32 2 Q62 2 62 32 Z" fill="rgba(244,63,94,0.5)"/>
+    <path d="M2 32 Q2 62 32 62 Q62 62 62 32 Z" fill="rgba(14,165,233,0.3)"/>
+    <line x1="2" y1="32" x2="62" y2="32" stroke="#c9a227" strokeWidth="1" opacity="0.7"/>
+    <circle cx="32" cy="32" r="9" fill="#0a0a0f" stroke="#c9a227" strokeWidth="1.5"/>
+    <circle cx="32" cy="32" r="5" fill="url(#cg2)"/>
+    <defs><radialGradient id="cg2" cx="30%" cy="30%" r="70%"><stop offset="0%" stopColor="#e8c547"/><stop offset="100%" stopColor="#8a6e1a"/></radialGradient></defs>
+  </svg>
+);
+
+// ── Card mini face ────────────────────────────────────────────────────────
+const cardData = [
+  { emoji:'🔥', name:'Charizard', color:'rgba(244,63,94,0.25)', rarity:'#ffd700', type:'Fuego' },
+  { emoji:'💧', name:'Blastoise', color:'rgba(14,165,233,0.25)', rarity:'#c0c0c0', type:'Agua' },
+  { emoji:'🌿', name:'Venusaur', color:'rgba(16,185,129,0.25)', rarity:'#10b981', type:'Planta' },
+  { emoji:'⚡', name:'Pikachu', color:'rgba(234,179,8,0.25)', rarity:'#ffd700', type:'Electric' },
+  { emoji:'🌙', name:'Gengar', color:'rgba(124,58,237,0.25)', rarity:'#7c3aed', type:'Veneno' },
+  { emoji:'🧊', name:'Mewtwo', color:'rgba(99,102,241,0.25)', rarity:'#ffd700', type:'Psychic' },
+  { emoji:'🌊', name:'Gyarados', color:'rgba(14,165,233,0.3)', rarity:'#c0c0c0', type:'Agua' },
+  { emoji:'💥', name:'Arcanine', color:'rgba(251,146,60,0.25)', rarity:'#cd7f32', type:'Fuego' },
+];
+
+const newsData = [
+  { tag:'Event', tagClass:'tag-event', title:'Regional Tournament — May 2026', date:'2 hours ago', emoji:'🏆', bg:'rgba(244,63,94,0.08)' },
+  { tag:'Update', tagClass:'tag-update', title:'New Expansion: Shadows of Time', date:'1 day ago', emoji:'🃏', bg:'rgba(201,162,39,0.08)' },
+  { tag:'New', tagClass:'tag-new', title:'EX cards available in the shop', date:'3 days ago', emoji:'⭐', bg:'rgba(16,185,129,0.08)' },
+  { tag:'Meta', tagClass:'tag-meta', title:'Top 10 decks right now', date:'1 week ago', emoji:'📊', bg:'rgba(14,165,233,0.08)' },
+];
+
+const rankData = [
+  { name:'AshMaster99', pts:'12,450 pts', badge:'Maestro', badgeColor:'#ffd700', bg:'rgba(255,215,0,0.1)', emoji:'🌟' },
+  { name:'MistyWave', pts:'11,230 pts', badge:'Experto', badgeColor:'#c0c0c0', bg:'rgba(192,192,192,0.1)', emoji:'💧' },
+  { name:'BrockStone', pts:'10,780 pts', badge:'Experto', badgeColor:'#cd7f32', bg:'rgba(205,127,50,0.1)', emoji:'🪨' },
+  { name:'GaryOak_', pts:'9,900 pts', badge:'Avanzado', badgeColor:'#10b981', bg:'rgba(16,185,129,0.08)', emoji:'🏅' },
+  { name:'Codemon_Fan', pts:'8,640 pts', badge:'Avanzado', badgeColor:'#10b981', bg:'rgba(16,185,129,0.08)', emoji:'🎴' },
+];
+
+const friendsData = [
+  { name:'MistyWave', status:'Playing Tournament', dot:'online', emoji:'💧' },
+  { name:'GaryOak_', status:'En la tienda', dot:'online', emoji:'🌿' },
+  { name:'TrainerRed', status:'5 min ago', dot:'away', emoji:'🔥' },
+  { name:'ProfOak', status:'Desconectado', dot:'offline', emoji:'📚' },
+];
+
+const shopData = [
+  { name:'Pack Legendario', price:'500', emoji:'🎴', bg:'rgba(201,162,39,0.12)', hot:true },
+  { name:'Pack Oscuro', price:'300', emoji:'🌙', bg:'rgba(124,58,237,0.12)', hot:false },
+  { name:'Pack Marino', price:'250', emoji:'🌊', bg:'rgba(14,165,233,0.12)', hot:false },
+  { name:'Pack Fuego', price:'250', emoji:'🔥', bg:'rgba(244,63,94,0.12)', hot:false },
+  { name:'Avatar Especial', price:'800', emoji:'👑', bg:'rgba(201,162,39,0.15)', hot:true },
+  { name:'Tablero Premium', price:'1200', emoji:'🏆', bg:'rgba(16,185,129,0.1)', hot:false },
+];
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#c9a227",
+  "bgDensity": "normal",
+  "showNews": true
+}/*EDITMODE-END*/;
+
+// ── App ───────────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [activeNav, setActiveNav] = useState('home');
+  const [openPanel, setOpenPanel] = useState(null);
+  const [playPulse, setPlayPulse] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (!e.target.closest('.trainer-menu-wrap')) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--gold', tweaks.accentColor);
+  }, [tweaks.accentColor]);
+
+  const navItems = [
+    { id:'home', label:'Inicio', icon:<IcoHome /> },
+    { id:'collection', label:'Cards', icon:<IcoCards /> },
+    { id:'shop', label:'Shop', icon:<IcoShop /> },
+    { id:'rankings', label:'Ranking', icon:<IcoRank /> },
+    { id:'friends', label:'Friends', icon:<IcoFriends /> },
+    { id:'news', label:'News', icon:<IcoNews /> },
+  ];
+
+  const bottomNav = [
+    { id:'profile', label:'Profile', icon:<IcoProfile /> },
+    { id:'settings', label:'Config', icon:<IcoSettings /> },
+  ];
+
+  const handleNav = id => {
+    if (['collection','shop','rankings','friends','settings','profile','news'].includes(id)) {
+      setOpenPanel(id);
+    } else {
+      setActiveNav(id);
+      setOpenPanel(null);
+    }
+  };
+
+  return (
+    <div className="layout">
+      {/* Sidebar */}
+      <nav className="sidebar">
+        <div className="sidebar-logo"><PBLogo size={40} /></div>
+        <div className="sidebar-divider"></div>
+        {navItems.map(n => (
+          <button key={n.id} className={`nav-btn${activeNav===n.id?' active':''}`} onClick={() => handleNav(n.id)} title={n.label}>
+            {n.icon}
+            <span className="nav-label">{n.label}</span>
+          </button>
+        ))}
+        <div className="sidebar-bottom">
+          <div className="sidebar-divider"></div>
+          {bottomNav.map(n => (
+            <button key={n.id} className={`nav-btn${activeNav===n.id?' active':''}`} onClick={() => handleNav(n.id)} title={n.label}>
+              {n.icon}
+              <span className="nav-label">{n.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Main */}
+      <div className="main">
+        {/* Topbar */}
+        <header className="topbar">
+          <div className="topbar-title">CODEMON TCG</div>
+          <div className="topbar-sep"></div>
+          <div className="coin-counter">
+            <div className="coin-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="url(#coinGrad)" stroke="rgba(201,162,39,0.6)" strokeWidth="1"/>
+                <text x="12" y="16" textAnchor="middle" fontSize="11" fontWeight="900" fontFamily="serif" fill="#0a0a0f">P</text>
+                <defs>
+                  <radialGradient id="coinGrad" cx="35%" cy="30%" r="70%">
+                    <stop offset="0%" stopColor="#e8c547"/>
+                    <stop offset="100%" stopColor="#8a6e1a"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <span className="coin-amount">12,450</span>
+            <button className="coin-add" title="Buy coins">+</button>
+          </div>
+
+          <button className="topbar-notif" onClick={() => {}}>
+            <IcoBell />
+            <span className="notif-dot"></span>
+          </button>
+          <div className="trainer-menu-wrap">
+            <div className="trainer-chip" onClick={() => setMenuOpen(o => !o)}>
+              <div className="trainer-avatar">🎴</div>
+              <div className="trainer-info">
+                <div className="trainer-name">Entrenador</div>
+                <div className="trainer-rank">⭐ Rango Oro</div>
+              </div>
+            </div>
+            {menuOpen && (
+              <div className="trainer-dropdown">
+                <button className="menu-item" onClick={() => { setMenuOpen(false); setOpenPanel('profile'); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  My Profile
+                </button>
+                <button className="menu-item" onClick={() => { setMenuOpen(false); setOpenPanel('settings'); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Settings
+                </button>
+                <div className="dropdown-sep"></div>
+                <button className="menu-item danger" onClick={() => { setMenuOpen(false); window.location.href = 'Codemon Login.html'; }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="content">
+          {/* HERO */}
+          <div className="hero">
+            <div className="hero-bg"></div>
+            {/* Big hero Pokemon silhouette */}
+            <div className="hero-poke">
+              <svg width="280" height="320" viewBox="0 0 280 320" fill="none">
+                {/* Charizard-like silhouette */}
+                <ellipse cx="140" cy="190" rx="55" ry="75" fill="rgba(201,162,39,0.07)"/>
+                <ellipse cx="140" cy="80" rx="42" ry="42" fill="rgba(201,162,39,0.07)"/>
+                <path d="M100 160 Q50 100 30 60 Q60 40 100 120" fill="rgba(201,162,39,0.05)"/>
+                <path d="M180 160 Q230 100 250 60 Q220 40 180 120" fill="rgba(201,162,39,0.05)"/>
+                <path d="M155 250 Q190 280 200 260 Q185 245 165 255" fill="rgba(244,63,94,0.06)"/>
+                {/* Glow rings */}
+                <circle cx="140" cy="160" r="120" stroke="rgba(201,162,39,0.04)" strokeWidth="1" fill="none"/>
+                <circle cx="140" cy="160" r="90" stroke="rgba(201,162,39,0.06)" strokeWidth="1" fill="none"/>
+              </svg>
+            </div>
+            <div className="hero-content">
+              <div className="hero-eyebrow">Temporada 4 — Sombras del Tiempo</div>
+              <div className="hero-title">LET'S PLAY!</div>
+              <div className="hero-sub">Build your deck, challenge trainers, and become the best in Codemon TCG.</div>
+              <div className="hero-actions">
+                <button className="play-btn" onClick={() => window.location.href = 'Codemon Game Lobby.html'}>
+                  <div className="play-btn-inner"><IcoPlay /> JUGAR AHORA</div>
+                </button>
+                <div className="update-badge">v2.4.1 — <span>New expansion available</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid */}
+          <div className="panel-grid">
+            <div className="panel-left">
+              {/* Stats */}
+              <div>
+                <div className="stats-row">
+                  <div className="stat-card">
+                    <div className="stat-icon">🎴</div>
+                    <div className="stat-value">247</div>
+                    <div className="stat-label">Cards in collection</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">🏆</div>
+                    <div className="stat-value">38</div>
+                    <div className="stat-label">Victorias esta semana</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">⭐</div>
+                    <div className="stat-value">#12</div>
+                    <div className="stat-label">Ranking position</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* News */}
+              {tweaks.showNews && (
+                <div className="panel-card">
+                  <div className="section-head">
+                    <div className="section-title">News</div>
+                    <button className="section-link" onClick={() => setOpenPanel('news')}>Ver todas →</button>
+                  </div>
+                  <div className="news-grid">
+                    {newsData.map((n, i) => (
+                      <div key={i} className="news-card">
+                        <div className="news-card-img" style={{ background: n.bg }}>
+                          <div style={{ fontSize: 36, opacity: 0.7 }}>{n.emoji}</div>
+                        </div>
+                        <div className="news-card-body">
+                          <span className={`news-tag ${n.tagClass}`}>{n.tag}</span>
+                          <div className="news-card-title">{n.title}</div>
+                          <div className="news-card-date">{n.date}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Collection preview */}
+              <div className="panel-card">
+                <div className="section-head">
+                  <div className="section-title">My Collection</div>
+                  <button className="section-link" onClick={() => setOpenPanel('collection')}>Ver todo →</button>
+                </div>
+                <div className="card-row">
+                  {cardData.map((c, i) => (
+                    <div key={i} className="mini-card">
+                      <div className="mini-card-inner" style={{ background: c.color }}>
+                        <span style={{ fontSize: 22 }}>{c.emoji}</span>
+                        <div className="mini-card-rarity" style={{ background: c.rarity }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div className="panel-right">
+              {/* Rankings */}
+              <div className="panel-card">
+                <div className="section-head">
+                  <div className="section-title">Ranking Global</div>
+                  <button className="section-link" onClick={() => setOpenPanel('rankings')}>See more →</button>
+                </div>
+                <div className="rank-list">
+                  {rankData.map((r, i) => (
+                    <div key={i} className="rank-item">
+                      <span className={`rank-num rank-${i < 3 ? i+1 : 'other'}`}>{i+1}</span>
+                      <div className="rank-avatar" style={{ background: `rgba(${i===0?'255,215,0':i===1?'192,192,192':'205,127,50'},0.15)` }}>
+                        {r.emoji}
+                      </div>
+                      <div className="rank-info">
+                        <div className="rank-name">{r.name}</div>
+                        <div className="rank-pts">{r.pts}</div>
+                      </div>
+                      <span className="rank-badge" style={{ background: `${r.badgeColor}22`, color: r.badgeColor }}>
+                        {r.badge}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Friends */}
+              <div className="panel-card">
+                <div className="section-head">
+                  <div className="section-title">Friends</div>
+                  <button className="section-link" onClick={() => setOpenPanel('friends')}>Ver todos →</button>
+                </div>
+                <div className="friends-list">
+                  {friendsData.map((f, i) => (
+                    <div key={i} className="friend-item">
+                      <div className="friend-avatar">
+                        {f.emoji}
+                        <span className={`online-dot dot-${f.dot}`}></span>
+                      </div>
+                      <div className="friend-info">
+                        <div className="friend-name">{f.name}</div>
+                        <div className="friend-status">{f.status}</div>
+                      </div>
+                      {f.dot !== 'offline' && <button className="friend-btn">Desafiar</button>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Full panels overlay */}
+      {openPanel && (
+        <div className="full-panel">
+          <div className="full-panel-head">
+            <PBLogo size={32} />
+            <div className="full-panel-title">
+              {openPanel==='collection' && 'My Collection'}
+              {openPanel==='shop' && 'Shop'}
+              {openPanel==='rankings' && 'Ranking Global'}
+              {openPanel==='friends' && 'Friends'}
+              {openPanel==='news' && 'News'}
+              {openPanel==='settings' && 'Settings'}
+              {openPanel==='profile' && 'My Profile'}
+            </div>
+            <button className="close-panel-btn" onClick={() => setOpenPanel(null)}>✕</button>
+          </div>
+
+          {openPanel === 'collection' && (
+            <div className="collection-grid">
+              {[...cardData, ...cardData, ...cardData].map((c, i) => (
+                <div key={i} className="coll-card">
+                  <div className="coll-card-face" style={{ background: c.color }}>
+                    <span>{c.emoji}</span>
+                    <span style={{ fontSize:9, fontFamily:'Cinzel,serif', color:'rgba(240,232,208,0.6)', letterSpacing:'0.1em' }}>{c.type}</span>
+                  </div>
+                  <div className="coll-card-name">{c.name}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {openPanel === 'shop' && (
+            <div className="shop-grid">
+              {shopData.map((s, i) => (
+                <div key={i} className="shop-item">
+                  <div className="shop-item-img" style={{ background: s.bg }}>
+                    <span>{s.emoji}</span>
+                    {s.hot && <span style={{ position:'absolute', top:8, right:8, fontSize:9, padding:'2px 6px', background:'rgba(244,63,94,0.8)', borderRadius:999, fontFamily:'Cinzel,serif', color:'#fff', letterSpacing:'0.05em' }}>HOT</span>}
+                  </div>
+                  <div className="shop-item-body">
+                    <div className="shop-item-name">{s.name}</div>
+                    <div className="shop-item-price">⭐ {s.price}</div>
+                    <button className="shop-buy-btn">COMPRAR</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {openPanel === 'rankings' && (
+            <div className="rank-list">
+              {[...rankData, ...rankData].map((r, i) => (
+                <div key={i} className="rank-item">
+                  <span className={`rank-num rank-${i < 3 ? i+1 : 'other'}`}>{i+1}</span>
+                  <div className="rank-avatar" style={{ background: `rgba(201,162,39,0.1)`, fontSize:18 }}>{r.emoji}</div>
+                  <div className="rank-info">
+                    <div className="rank-name">{r.name}</div>
+                    <div className="rank-pts">{r.pts}</div>
+                  </div>
+                  <span className="rank-badge" style={{ background: `${r.badgeColor}22`, color: r.badgeColor }}>{r.badge}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {openPanel === 'friends' && (
+            <div className="friends-list">
+              {[...friendsData, ...friendsData].map((f, i) => (
+                <div key={i} className="friend-item">
+                  <div className="friend-avatar">
+                    {f.emoji}
+                    <span className={`online-dot dot-${f.dot}`}></span>
+                  </div>
+                  <div className="friend-info">
+                    <div className="friend-name">{f.name}</div>
+                    <div className="friend-status">{f.status}</div>
+                  </div>
+                  {f.dot !== 'offline' && <button className="friend-btn">Desafiar</button>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {openPanel === 'news' && (
+            <div className="news-grid" style={{ gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))' }}>
+              {[...newsData, ...newsData].map((n, i) => (
+                <div key={i} className="news-card">
+                  <div className="news-card-img" style={{ background: n.bg, height:120 }}>
+                    <div style={{ fontSize:42, opacity:0.7 }}>{n.emoji}</div>
+                  </div>
+                  <div className="news-card-body">
+                    <span className={`news-tag ${n.tagClass}`}>{n.tag}</span>
+                    <div className="news-card-title">{n.title}</div>
+                    <div className="news-card-date">{n.date}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {openPanel === 'profile' && (
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:24 }}>
+              <div style={{ width:100, height:100, borderRadius:'50%', background:'linear-gradient(135deg,rgba(201,162,39,0.3),rgba(124,58,237,0.3))', border:'2px solid #8a6e1a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40 }}>🎴</div>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:'Cinzel Decorative,serif', fontSize:22, color:'var(--gold-light)', marginBottom:6 }}>Entrenador</div>
+                <div style={{ fontSize:12, color:'var(--text-secondary)' }}>Miembro desde Enero 2024</div>
+              </div>
+              <div className="stats-row" style={{ width:'100%', maxWidth:500 }}>
+                <div className="stat-card"><div className="stat-icon">🎴</div><div className="stat-value">247</div><div className="stat-label">Cards</div></div>
+                <div className="stat-card"><div className="stat-icon">🏆</div><div className="stat-value">156</div><div className="stat-label">Victorias</div></div>
+                <div className="stat-card"><div className="stat-icon">⭐</div><div className="stat-value">Oro</div><div className="stat-label">Rango</div></div>
+              </div>
+            </div>
+          )}
+
+          {openPanel === 'settings' && (
+            <div className="settings-grid">
+              {[
+                { label:'Sonido', on:true },
+                { label:'Music', on:true },
+                { label:'Notificaciones', on:false },
+                { label:'Animaciones', on:true },
+                { label:'Modo oscuro', on:true },
+                { label:'Automatic tournament', on:false },
+              ].map((s, i) => (
+                <div key={i} className="setting-item">
+                  <div className="setting-label">{s.label}</div>
+                  <button className={`setting-toggle${s.on?' on':''}`}><i /></button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <TweaksPanel title="Tweaks">
+        <TwkSection title="Colores">
+          <TwkColor label="Acento dorado" tweakKey="accentColor" tweaks={tweaks} setTweak={setTweak} />
+        </TwkSection>
+        <TwkSection title="Opciones">
+          <TwkToggle label="Mostrar noticias" tweakKey="showNews" tweaks={tweaks} setTweak={setTweak} />
+        </TwkSection>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

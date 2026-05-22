@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Codemon — Battle Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07080f;
+      --field: #0c0e1a;
+      --panel: #0f111e;
+      --card-back: #1a1c2e;
+      --gold: #c9a227;
+      --gold-l: #e8c547;
+      --gold-d: #8a6e1a;
+      --text: #f0e8d0;
+      --text-s: #8a8090;
+      --text-d: #4a4456;
+      --border: rgba(201,162,39,0.15);
+      --border-h: rgba(201,162,39,0.4);
+      --red: #f43f5e;
+      --blue: #0ea5e9;
+      --green: #10b981;
+      --purple: #7c3aed;
+      --yellow: #eab308;
+    }
+    html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--text); }
+    #root { height: 100%; display: flex; }
+
+    /* ── Animations ── */
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes scaleIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    @keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    @keyframes attackSlam { 0%{transform:scale(1) translateY(0);filter:brightness(1)} 30%{transform:scale(1.25) translateY(-20px);filter:brightness(1.6) drop-shadow(0 0 20px var(--atk-color,#f43f5e))} 60%{transform:scale(0.9) translateY(30px);filter:brightness(0.8)} 100%{transform:scale(1) translateY(0);filter:brightness(1)} }
+    @keyframes shakeField { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+    @keyframes dmgPop { 0%{opacity:0;transform:scale(0.5) translateY(0)} 30%{opacity:1;transform:scale(1.3) translateY(-10px)} 70%{opacity:1;transform:scale(1) translateY(-30px)} 100%{opacity:0;transform:scale(0.8) translateY(-50px)} }
+    @keyframes holoShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+    @keyframes pulseGlow { 0%,100%{box-shadow:0 0 8px var(--gc,rgba(201,162,39,0.3))} 50%{box-shadow:0 0 20px var(--gc,rgba(201,162,39,0.5))} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    @keyframes zoomCardIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.6)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+    @keyframes energyBurst { 0%{transform:scale(0);opacity:1} 100%{transform:scale(3);opacity:0} }
+    @keyframes slideInRight { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes turnBanner { 0%{opacity:0;transform:translate(-50%,-50%) scale(0.7)} 20%{opacity:1;transform:translate(-50%,-50%) scale(1)} 80%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)} }
+
+    @property --holo-angle { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+    @keyframes holoSpin { from{--holo-angle:0deg} to{--holo-angle:360deg} }
+
+    /* ── Layout ── */
+    .arena-wrap { position:relative; flex:1; display:flex; flex-direction:column; overflow:hidden; background: radial-gradient(ellipse 120% 80% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 60%), radial-gradient(ellipse 80% 60% at 20% 80%, rgba(14,165,233,0.05) 0%, transparent 50%), var(--bg); }
+
+    /* Field texture */
+    .arena-wrap::before { content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(201,162,39,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(201,162,39,0.03) 1px, transparent 1px); background-size:48px 48px; pointer-events:none; z-index:0; }
+
+    /* Center divider */
+    .field-divider { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); height:2px; background:linear-gradient(90deg, transparent, rgba(201,162,39,0.15), rgba(201,162,39,0.3), rgba(201,162,39,0.15), transparent); z-index:1; pointer-events:none; }
+    .field-divider::before { content:'CODEMON TCG'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-family:'Cinzel Decorative',serif; font-size:9px; letter-spacing:0.4em; color:rgba(201,162,39,0.3); white-space:nowrap; padding:0 16px; background:var(--bg); }
+
+    /* ── Top bar ── */
+    .topbar { position:relative; z-index:10; height:44px; background:rgba(7,8,15,0.9); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 14px; gap:10px; backdrop-filter:blur(12px); flex-shrink:0; }
+    .topbar-logo { font-family:'Cinzel Decorative',serif; font-size:11px; font-weight:900; background:linear-gradient(135deg,var(--gold-l),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:0.1em; }
+    .topbar-sep { flex:1; }
+    .turn-indicator { display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:999px; border:1px solid; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.1em; transition:all 0.3s; }
+    .turn-my { border-color:rgba(201,162,39,0.5); background:rgba(201,162,39,0.1); color:var(--gold-l); }
+    .turn-rival { border-color:rgba(244,63,94,0.4); background:rgba(244,63,94,0.08); color:#f43f5e; }
+    .turn-dot { width:7px; height:7px; border-radius:50%; animation:pulseGlow 1.2s ease-in-out infinite; }
+    .turn-my .turn-dot { background:var(--gold); --gc:rgba(201,162,39,0.6); }
+    .turn-rival .turn-dot { background:#f43f5e; --gc:rgba(244,63,94,0.5); }
+
+    .timer-pill { display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-family:'Cinzel',serif; font-size:13px; font-weight:700; }
+    .timer-pill.urgent { border-color:rgba(244,63,94,0.5); color:#f43f5e; animation:pulseGlow 0.6s ease-in-out infinite; --gc:rgba(244,63,94,0.3); }
+
+    .top-action-btn { height:30px; padding:0 12px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.12em; color:var(--text-s); cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+    .top-action-btn:hover { border-color:var(--border-h); color:var(--text); }
+    .top-action-btn.danger:hover { border-color:rgba(244,63,94,0.5); color:var(--red); background:rgba(244,63,94,0.06); }
+    .top-action-btn.help { border-color:rgba(14,165,233,0.3); color:var(--blue); }
+    .top-action-btn.help:hover { border-color:rgba(14,165,233,0.6); background:rgba(14,165,233,0.06); }
+
+    /* ── Main field ── */
+    .field-area { position:relative; z-index:1; flex:1; display:grid; grid-template-columns:72px 1fr 72px; overflow:hidden; }
+
+    /* ── Side panels ── */
+    .side-panel { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:8px 4px; }
+
+    .zone-stack { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .zone-label { font-family:'Cinzel',serif; font-size:7px; letter-spacing:0.15em; color:var(--text-d); text-transform:uppercase; text-align:center; }
+    .zone-count { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:var(--gold); }
+
+    /* Card back */
+    .card-back { width:44px; height:62px; border-radius:5px; background:linear-gradient(135deg,#1a1c2e,#0f111e); border:1px solid rgba(201,162,39,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+    .card-back::before { content:''; position:absolute; inset:2px; border-radius:3px; border:1px solid rgba(201,162,39,0.15); }
+    .card-back:hover { border-color:rgba(201,162,39,0.5); transform:translateY(-2px); }
+    .card-back-pb { width:24px; height:24px; opacity:0.4; }
+
+    /* Prize cards */
+    .prize-stack { display:flex; flex-direction:column; gap:3px; }
+    .prize-card { width:32px; height:44px; border-radius:3px; background:linear-gradient(135deg,rgba(201,162,39,0.15),rgba(124,58,237,0.1)); border:1px solid rgba(201,162,39,0.25); }
+    .prize-card.taken { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.05); opacity:0.4; }
+
+    /* Discard */
+    .discard-pile { width:44px; height:62px; border-radius:5px; border:1px solid rgba(244,63,94,0.2); background:rgba(244,63,94,0.04); display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+    /* ── Center field ── */
+    .center-field { display:flex; flex-direction:column; position:relative; }
+    .field-half { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:8px 0; }
+    .field-half.rival { transform:rotate(180deg); }
+
+    /* Active + bench row */
+    .field-row { display:flex; align-items:center; justify-content:center; gap:10px; }
+
+    /* ── Cards ── */
+    .poke-card { width:68px; height:95px; border-radius:8px; border:1.5px solid var(--border); background:var(--card-back); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; transition:all 0.25s ease; flex-shrink:0; }
+    .poke-card:hover { transform:translateY(-4px) scale(1.05); border-color:var(--border-h); box-shadow:0 8px 24px rgba(0,0,0,0.6); }
+    .poke-card.active-slot { width:80px; height:112px; }
+    .poke-card.active-slot::before { content:'ACTIVO'; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); font-family:'Cinzel',serif; font-size:6px; letter-spacing:0.15em; color:rgba(255,255,255,0.4); z-index:2; }
+    .poke-card.glowing { border-color:var(--gold); animation:pulseGlow 1s ease-in-out infinite; --gc:rgba(201,162,39,0.5); }
+    .poke-card.attacking { animation:attackSlam 0.6s ease-out; }
+    .poke-card.empty-slot { border-style:dashed; border-color:rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); cursor:default; }
+    .poke-card.empty-slot:hover { transform:none; box-shadow:none; border-color:rgba(255,255,255,0.08); }
+
+    /* Holo card shimmer */
+    .poke-card.holo::after { content:''; position:absolute; inset:0; background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%); background-size:200% auto; animation:holoShimmer 3s linear infinite; }
+    .poke-card.holo { border-color:rgba(201,162,39,0.4); }
+
+    .card-face { width:100%; height:100%; display:flex; flex-direction:column; padding:4px; gap:2px; }
+    .card-header { display:flex; align-items:center; justify-content:space-between; }
+    .card-name { font-family:'Cinzel',serif; font-size:7px; font-weight:700; color:var(--text); line-height:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:52px; }
+    .card-hp { font-family:'Cinzel',serif; font-size:7px; font-weight:700; }
+    .card-art { flex:1; display:flex; align-items:center; justify-content:center; font-size:26px; position:relative; }
+    .card-art.active-art { font-size:34px; }
+    .card-type-badge { position:absolute; bottom:2px; right:2px; width:12px; height:12px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:7px; }
+    .hp-bar { height:3px; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; }
+    .hp-fill { height:100%; border-radius:999px; transition:width 0.5s ease; }
+    .hp-full { background:linear-gradient(90deg,#10b981,#34d399); }
+    .hp-mid { background:linear-gradient(90deg,#eab308,#fbbf24); }
+    .hp-low { background:linear-gradient(90deg,#f43f5e,#fb7185); }
+    .card-status { position:absolute; top:2px; right:2px; font-size:8px; }
+
+    /* Energy on card */
+    .card-energy { display:flex; gap:2px; flex-wrap:wrap; }
+    .energy-pip { width:8px; height:8px; border-radius:50%; }
+
+    /* ── Hand ── */
+    .hand-area { position:relative; z-index:10; height:90px; background:rgba(7,8,15,0.9); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 80px; gap:6px; flex-shrink:0; backdrop-filter:blur(12px); overflow-x:auto; overflow-y:hidden; }
+    .hand-area::-webkit-scrollbar { height:3px; }
+    .hand-area::-webkit-scrollbar-thumb { background:rgba(201,162,39,0.2); border-radius:2px; }
+
+    .hand-card { width:58px; height:80px; border-radius:7px; border:1.5px solid rgba(201,162,39,0.2); background:var(--card-back); display:flex; flex-direction:column; padding:4px; cursor:pointer; transition:all 0.2s; flex-shrink:0; position:relative; overflow:hidden; }
+    .hand-card:hover { transform:translateY(-8px) scale(1.08); border-color:var(--gold); box-shadow:0 12px 28px rgba(0,0,0,0.7), 0 0 16px rgba(201,162,39,0.2); z-index:5; }
+    .hand-card.selected { transform:translateY(-12px) scale(1.1); border-color:var(--gold-l); box-shadow:0 14px 32px rgba(0,0,0,0.7), 0 0 20px rgba(201,162,39,0.4); z-index:6; }
+    .hand-card-art { flex:1; display:flex; align-items:center; justify-content:center; font-size:22px; }
+    .hand-card-name { font-family:'Cinzel',serif; font-size:6.5px; font-weight:700; color:var(--text-s); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* Hand label */
+    .hand-label { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.2em; color:var(--text-d); text-transform:uppercase; writing-mode:vertical-rl; }
+    .hand-count { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-family:'Cinzel',serif; font-size:18px; font-weight:700; color:rgba(201,162,39,0.2); }
+
+    /* ── Action bar ── */
+    .action-bar { position:absolute; bottom:98px; left:50%; transform:translateX(-50%); z-index:20; display:flex; gap:8px; }
+    .action-btn { padding:9px 20px; border:none; border-radius:10px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.1em; cursor:pointer; transition:all 0.25s; text-transform:uppercase; }
+    .action-btn.primary { background:linear-gradient(135deg,#b8891f,#c9a227,#e8c547,#c9a227); background-size:200% auto; color:#0a0a0f; box-shadow:0 4px 16px rgba(201,162,39,0.4); }
+    .action-btn.primary:hover { background-position:right center; transform:translateY(-2px); box-shadow:0 6px 22px rgba(201,162,39,0.55); }
+    .action-btn.secondary { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-s); }
+    .action-btn.secondary:hover { border-color:var(--border-h); color:var(--text); }
+    .action-btn.attack { background:linear-gradient(135deg,rgba(244,63,94,0.8),rgba(244,63,94,0.6)); color:#fff; border:1px solid rgba(244,63,94,0.5); box-shadow:0 4px 16px rgba(244,63,94,0.3); }
+    .action-btn.attack:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(244,63,94,0.5); }
+    .action-btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    /* ── Drawer: Chat + Log ── */
+    .unread-dot { width:7px; height:7px; border-radius:50%; background:#f43f5e; border:1.5px solid var(--bg); animation:pulseGlow 1s ease-in-out infinite; --gc:rgba(244,63,94,0.5); flex-shrink:0; }
+    .drawer-toggle { position:fixed; top:52px; left:12px; z-index:50; display:flex; align-items:center; gap:6px; padding:6px 12px 6px 8px; border-radius:999px; border:1px solid var(--border); background:rgba(7,8,15,0.88); backdrop-filter:blur(12px); cursor:pointer; transition:all 0.2s; font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.1em; color:var(--text-s); text-transform:uppercase; }
+    .drawer-toggle:hover { border-color:var(--border-h); color:var(--text); }
+    .drawer-overlay { position:fixed; inset:0; z-index:99; background:rgba(0,0,0,0.45); backdrop-filter:blur(2px); animation:fadeIn 0.2s ease both; }
+    .drawer-panel { position:fixed; top:0; left:0; bottom:0; z-index:100; width:280px; background:rgba(7,8,15,0.97); border-right:1px solid var(--border); display:flex; flex-direction:column; backdrop-filter:blur(20px); box-shadow:8px 0 32px rgba(0,0,0,0.6); transition:transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+    .drawer-panel.closed { transform:translateX(-100%); pointer-events:none; }
+    .drawer-panel.open { transform:translateX(0); }
+    .drawer-close { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-s); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+    .drawer-close:hover { border-color:var(--border-h); color:var(--text); }
+    .rpanel-tabs { display:flex; border-bottom:1px solid var(--border); padding-top:44px; }
+    .rtab { flex:1; padding:10px; border:none; background:transparent; font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.12em; color:var(--text-d); cursor:pointer; text-transform:uppercase; transition:all 0.2s; border-bottom:2px solid transparent; }
+    .rtab.active { color:var(--gold); border-bottom-color:var(--gold); }
+    .rpanel-body { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px; }
+    .rpanel-body::-webkit-scrollbar { width:3px; }
+    .rpanel-body::-webkit-scrollbar-thumb { background:rgba(201,162,39,0.2); border-radius:2px; }
+
+    /* Log entries */
+    .log-entry { display:flex; gap:6px; animation:fadeUp 0.3s ease both; }
+    .log-time { font-size:9px; color:var(--text-d); font-family:'Cinzel',serif; flex-shrink:0; padding-top:1px; }
+    .log-text { font-size:11px; color:var(--text-s); line-height:1.4; }
+    .log-text.highlight { color:var(--gold); font-weight:700; }
+    .log-text.damage { color:var(--red); font-weight:700; }
+    .log-text.good { color:var(--green); }
+
+    /* Chat messages */
+    .chat-msg { display:flex; flex-direction:column; gap:2px; animation:fadeUp 0.3s ease both; }
+    .chat-who { font-family:'Cinzel',serif; font-size:9px; font-weight:700; }
+    .chat-who.me { color:var(--gold); }
+    .chat-who.rival { color:var(--blue); }
+    .chat-bubble { padding:6px 10px; border-radius:8px; font-size:12px; line-height:1.4; max-width:180px; }
+    .chat-bubble.me { background:rgba(201,162,39,0.1); border:1px solid rgba(201,162,39,0.2); align-self:flex-end; }
+    .chat-bubble.rival { background:rgba(14,165,233,0.08); border:1px solid rgba(14,165,233,0.15); }
+
+    /* Emote buttons */
+    .emote-row { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border-top:1px solid var(--border); }
+    .emote-btn { padding:5px 10px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); font-size:14px; cursor:pointer; transition:all 0.2s; }
+    .emote-btn:hover { border-color:var(--border-h); transform:scale(1.15); background:rgba(255,255,255,0.06); }
+
+    /* Chat input */
+    .chat-input-row { display:flex; gap:6px; padding:8px; border-top:1px solid var(--border); }
+    .chat-input { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-family:'Nunito',sans-serif; font-size:12px; color:var(--text); outline:none; transition:all 0.2s; caret-color:var(--gold); }
+    .chat-input:focus { border-color:var(--gold-d); }
+    .chat-send { padding:7px 10px; border:none; border-radius:8px; background:rgba(201,162,39,0.15); color:var(--gold); cursor:pointer; font-size:13px; transition:all 0.2s; }
+    .chat-send:hover { background:rgba(201,162,39,0.25); }
+
+    /* ── Overlays ── */
+    /* Damage popup */
+    .dmg-popup { position:absolute; pointer-events:none; z-index:50; animation:dmgPop 1s ease-out both; font-family:'Cinzel Decorative',serif; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
+
+    /* Energy burst */
+    .energy-burst { position:absolute; pointer-events:none; z-index:40; border-radius:50%; animation:energyBurst 0.6s ease-out both; }
+
+    /* Turn banner */
+    .turn-banner { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:100; font-family:'Cinzel Decorative',serif; font-size:28px; font-weight:900; padding:14px 36px; border-radius:16px; border:2px solid; animation:turnBanner 2s ease-out both; text-align:center; pointer-events:none; }
+    .turn-banner.myturn { background:rgba(201,162,39,0.15); border-color:rgba(201,162,39,0.5); color:var(--gold-l); box-shadow:0 0 40px rgba(201,162,39,0.2); }
+    .turn-banner.rivalturn { background:rgba(244,63,94,0.12); border-color:rgba(244,63,94,0.4); color:#f87171; box-shadow:0 0 40px rgba(244,63,94,0.15); }
+
+    /* Card zoom overlay */
+    .card-zoom-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; animation:fadeIn 0.2s ease both; cursor:pointer; }
+    .card-zoom-inner { position:relative; animation:scaleIn 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+    .card-zoom-big { width:220px; height:308px; border-radius:16px; border:2px solid rgba(201,162,39,0.4); background:var(--card-back); display:flex; flex-direction:column; padding:12px; gap:8px; position:relative; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.8), 0 0 40px rgba(201,162,39,0.15); }
+    .card-zoom-big::before { content:''; position:absolute; inset:-1px; border-radius:17px; background:conic-gradient(from var(--holo-angle,0deg),rgba(124,58,237,0) 0%,rgba(124,58,237,0.3) 15%,rgba(14,165,233,0.3) 30%,rgba(201,162,39,0.4) 45%,rgba(244,63,94,0.2) 60%,rgba(201,162,39,0) 80%); mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; padding:2px; animation:holoSpin 6s linear infinite; }
+    .zoom-card-name { font-family:'Cinzel Decorative',serif; font-size:14px; font-weight:900; background:linear-gradient(135deg,var(--gold-l),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .zoom-card-art { flex:1; display:flex; align-items:center; justify-content:center; font-size:72px; }
+    .zoom-card-hp { font-family:'Cinzel',serif; font-size:13px; font-weight:700; color:var(--green); }
+    .zoom-attack-list { display:flex; flex-direction:column; gap:6px; }
+    .zoom-attack { padding:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; }
+    .zoom-attack-name { font-family:'Cinzel',serif; font-size:10px; font-weight:700; color:var(--gold); margin-bottom:2px; }
+    .zoom-attack-dmg { font-size:20px; font-family:'Cinzel',serif; font-weight:700; color:var(--text); }
+    .zoom-attack-desc { font-size:9px; color:var(--text-s); line-height:1.4; }
+    .zoom-close-hint { text-align:center; font-size:10px; color:var(--text-d); margin-top:8px; font-family:'Cinzel',serif; letter-spacing:0.1em; }
+
+    /* Surrender confirm */
+    .surrender-modal { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; animation:fadeIn 0.2s ease both; }
+    .surrender-box { background:rgba(13,13,22,0.98); border:1px solid rgba(244,63,94,0.3); border-radius:20px; padding:32px; width:320px; text-align:center; animation:scaleIn 0.3s cubic-bezier(0.22,1,0.36,1) both; box-shadow:0 20px 60px rgba(0,0,0,0.8); }
+    .surrender-title { font-family:'Cinzel Decorative',serif; font-size:18px; color:#f87171; margin-bottom:8px; }
+    .surrender-sub { font-size:13px; color:var(--text-s); margin-bottom:24px; line-height:1.5; }
+    .surrender-btns { display:flex; gap:10px; }
+    .surrender-yes { flex:1; padding:11px; border:none; border-radius:10px; background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.4); color:#f87171; font-family:'Cinzel',serif; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.1em; transition:all 0.2s; }
+    .surrender-yes:hover { background:rgba(244,63,94,0.25); }
+    .surrender-no { flex:1; padding:11px; border:1px solid var(--border); border-radius:10px; background:rgba(255,255,255,0.03); color:var(--text-s); font-family:'Cinzel',serif; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.1em; transition:all 0.2s; }
+    .surrender-no:hover { border-color:var(--border-h); color:var(--text); }
+
+    /* Help modal */
+    .help-modal { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; animation:fadeIn 0.2s ease both; }
+    .help-box { background:rgba(13,13,22,0.98); border:1px solid rgba(14,165,233,0.3); border-radius:20px; padding:28px; width:380px; animation:scaleIn 0.3s cubic-bezier(0.22,1,0.36,1) both; box-shadow:0 20px 60px rgba(0,0,0,0.8); }
+    .help-title { font-family:'Cinzel Decorative',serif; font-size:16px; color:var(--blue); margin-bottom:16px; }
+    .help-item { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .help-key { font-family:'Cinzel',serif; font-size:10px; font-weight:700; color:var(--gold); min-width:80px; flex-shrink:0; }
+    .help-val { font-size:11px; color:var(--text-s); line-height:1.5; }
+    .help-close { margin-top:16px; width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; background:rgba(255,255,255,0.03); color:var(--text-s); font-family:'Cinzel',serif; font-size:11px; cursor:pointer; transition:all 0.2s; letter-spacing:0.1em; }
+    .help-close:hover { border-color:var(--border-h); color:var(--text); }
+
+    /* Player info chips */
+    .player-chip { position:absolute; display:flex; align-items:center; gap:8px; padding:6px 12px 6px 6px; background:rgba(7,8,15,0.85); border:1px solid var(--border); border-radius:999px; z-index:5; backdrop-filter:blur(8px); }
+    .player-chip.bottom { bottom:100px; left:16px; }
+    .player-chip.top { top:50px; right:16px; }
+    .player-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border); }
+    .player-name { font-family:'Cinzel',serif; font-size:10px; font-weight:700; }
+    .player-rank { font-size:9px; color:var(--text-d); }
+
+    /* ── Tweaks panel ── */
+    .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:rgba(250,249,247,.82);color:#29261b;-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.25);font:11.5px/1.4 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+    .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none}
+    .twk-hd b{font-size:12px;font-weight:600}
+    .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px}
+    .twk-x:hover{background:rgba(0,0,0,.06)}
+    .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;min-height:0}
+    .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.45);padding:8px 0 0}
+    .twk-sect:first-child{padding-top:0}
+    .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.06);user-select:none}
+    .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .18s cubic-bezier(.3,.7,.4,1),width .18s}
+    .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;min-height:24px;border-radius:6px;cursor:default;padding:4px 4px;line-height:1.2;font-size:10px}
+    .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+    .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+    .twk-row{display:flex;flex-direction:column;gap:5px}
+    .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
+    .twk-lbl>span:first-child{font-weight:500}
+    .twk-val{color:rgba(41,38,27,.45);font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Tweaks ────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "arenaTheme": "mystic",
+  "battleIntensity": "normal",
+  "cardStyle": "tcg"
+}/*EDITMODE-END*/;
+
+const ARENA_THEMES = {
+  mystic:  { name:'Mystic',    bg:'#07080f', accent:'#c9a227', glow:'rgba(124,58,237,0.08)', glow2:'rgba(14,165,233,0.05)',  divider:'rgba(201,162,39,0.3)',  gridColor:'rgba(201,162,39,0.03)' },
+  volcano: { name:'Volcano',   bg:'#0f0700', accent:'#f43f5e', glow:'rgba(244,63,94,0.1)',   glow2:'rgba(251,146,60,0.06)',  divider:'rgba(244,63,94,0.4)',   gridColor:'rgba(244,63,94,0.03)' },
+  abyss:   { name:'Abismo',    bg:'#00070f', accent:'#0ea5e9', glow:'rgba(14,165,233,0.1)',  glow2:'rgba(99,102,241,0.06)', divider:'rgba(14,165,233,0.4)',  gridColor:'rgba(14,165,233,0.03)' },
+  forest:  { name:'Bosque',    bg:'#030f06', accent:'#10b981', glow:'rgba(16,185,129,0.1)',  glow2:'rgba(234,179,8,0.05)',  divider:'rgba(16,185,129,0.4)',  gridColor:'rgba(16,185,129,0.03)' },
+};
+
+const INTENSITY_CONFIG = {
+  calm:    { shake:0, attackScale:1.08, dmgSize:22, bannerDur:1200, rivalDelay:3500 },
+  normal:  { shake:6, attackScale:1.25, dmgSize:32, bannerDur:2200, rivalDelay:2000 },
+  frantic: { shake:12, attackScale:1.45, dmgSize:44, bannerDur:1600, rivalDelay:900 },
+};
+
+const CARD_STYLES = {
+  tcg:   { radius:8,  border:'1.5px solid', nameSize:'7px',  artSize:'26px', activeArt:'34px', bg:'#1a1c2e' },
+  holo:  { radius:10, border:'2px solid',   nameSize:'7px',  artSize:'28px', activeArt:'36px', bg:'#16182e' },
+  pixel: { radius:2,  border:'2px solid',   nameSize:'6px',  artSize:'24px', activeArt:'30px', bg:'#0c0e1a' },
+};
+
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((k, v) => {
+    const edits = typeof k === 'object' ? k : { [k]: v };
+    setValues(prev => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ children }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const off = useRef({ x: 16, y: 16 });
+  useEffect(() => {
+    const h = e => { const t = e?.data?.type; if (t==='__activate_edit_mode') setOpen(true); else if (t==='__deactivate_edit_mode') setOpen(false); };
+    window.addEventListener('message', h);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', h);
+  }, []);
+  const dismiss = () => { setOpen(false); window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); };
+  const drag = e => {
+    const r = ref.current.getBoundingClientRect(), sx = e.clientX, sy = e.clientY;
+    const sr = window.innerWidth - r.right, sb = window.innerHeight - r.bottom;
+    const mv = ev => { off.current = { x: sr-(ev.clientX-sx), y: sb-(ev.clientY-sy) }; ref.current.style.right = off.current.x+'px'; ref.current.style.bottom = off.current.y+'px'; };
+    const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+  };
+  if (!open) return null;
+  return (
+    <div ref={ref} className="twk-panel" style={{ right: off.current.x, bottom: off.current.y }}>
+      <div className="twk-hd" onMouseDown={drag}><b>Tweaks</b><button className="twk-x" onMouseDown={e=>e.stopPropagation()} onClick={dismiss}>✕</button></div>
+      <div className="twk-body">{children}</div>
+    </div>
+  );
+}
+
+function TwkSegment({ label, tweakKey, tweaks, setTweak, options }) {
+  const trackRef = useRef(null);
+  const [drag, setDrag] = useState(false);
+  const v = tweaks[tweakKey];
+  const opts = options.map(o => typeof o === 'object' ? o : { value: o, label: o });
+  const idx = Math.max(0, opts.findIndex(o => o.value === v));
+  const n = opts.length;
+  const vRef = useRef(v); vRef.current = v;
+  const segAt = cx => { const r = trackRef.current.getBoundingClientRect(); const i = Math.floor(((cx-r.left-2)/(r.width-4))*n); return opts[Math.max(0,Math.min(n-1,i))].value; };
+  const pd = e => {
+    setDrag(true);
+    const v0 = segAt(e.clientX); if (v0 !== vRef.current) setTweak(tweakKey, v0);
+    const mv = ev => { if (!trackRef.current) return; const vv = segAt(ev.clientX); if (vv !== vRef.current) setTweak(tweakKey, vv); };
+    const up = () => { setDrag(false); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-row">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <div ref={trackRef} className={drag?'twk-seg dragging':'twk-seg'} onPointerDown={pd}>
+        <div className="twk-seg-thumb" style={{ left:`calc(2px + ${idx} * (100% - 4px) / ${n})`, width:`calc((100% - 4px) / ${n})` }}/>
+        {opts.map(o => <button key={o.value} type="button">{o.label}</button>)}
+      </div>
+    </div>
+  );
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────
+
+const CARDS = [
+  { id:'c1', name:'Charizard', emoji:'🔥', type:'fire', typeColor:'#f43f5e', hp:180, maxHp:180, energy:['fire','fire'], attacks:[{name:'Flamethrower',dmg:90,desc:'Discard 2 Fire Energy cards.'},{name:'Fire Wing',dmg:140,desc:'This Pokemon deals 50 damage to itself.'}], holo:true, status:null },
+  { id:'c2', name:'Blastoise', emoji:'💧', type:'water', typeColor:'#0ea5e9', hp:160, maxHp:160, energy:['water','water'], attacks:[{name:'Water Cannon',dmg:80,desc:'You may move Water Energy.'},{name:'Hydro Pump',dmg:120,desc:'Effect: heal 30 HP.'}], holo:true, status:null },
+  { id:'c3', name:'Mewtwo', emoji:'🌀', type:'psychic', typeColor:'#7c3aed', hp:130, maxHp:130, energy:['psychic'], attacks:[{name:'Psychic',dmg:60,desc:'The opponent discards 1 card.'},{name:'Psychic Megablow',dmg:150,desc:'This Pokemon cannot attack during the next turn.'}], holo:true, status:null },
+  { id:'c4', name:'Pikachu', emoji:'⚡', type:'electric', typeColor:'#eab308', hp:70, maxHp:70, energy:['electric'], attacks:[{name:'Thunder Shock',dmg:30,desc:'Paralyzes the opponent.'},{name:'Thunderbolt',dmg:90,desc:'Discard 2 Lightning Energy cards.'}], holo:false, status:null },
+  { id:'c5', name:'Gengar', emoji:'👻', type:'poison', typeColor:'#7c3aed', hp:110, maxHp:110, energy:['psychic','psychic'], attacks:[{name:'Curse',dmg:50,desc:'Poisons the opponent.'},{name:'Shadow Ball',dmg:100,desc:'The opponent discards the Active Pokemon.'}], holo:false, status:null },
+  { id:'c6', name:'Snorlax', emoji:'😴', type:'normal', typeColor:'#8a8090', hp:150, maxHp:150, energy:['normal','normal'], attacks:[{name:'Crush',dmg:60,desc:'This Pokemon cannot retreat.'},{name:'Body Slam',dmg:100,desc:'Damage based on its own HP.'}], holo:false, status:null },
+  { id:'c7', name:'Lucario', emoji:'🥊', type:'fight', typeColor:'#f97316', hp:120, maxHp:120, energy:['fight'], attacks:[{name:'Vacuum Strike',dmg:70,desc:'Ignores opponent effects.'},{name:'Aura Sphere',dmg:120,desc:'No additional effects.'}], holo:false, status:null },
+  { id:'c8', name:'Eevee', emoji:'🦊', type:'normal', typeColor:'#8a8090', hp:60, maxHp:60, energy:[], attacks:[{name:'Quick Attack',dmg:20,desc:'Acts first this turn.'},{name:'Headbutt',dmg:40,desc:'No effects.'}], holo:false, status:null },
+];
+
+const RIVAL_CARDS = [
+  { id:'r1', name:'Gyarados', emoji:'🌊', type:'water', typeColor:'#0ea5e9', hp:130, maxHp:130, energy:['water','water'], attacks:[{name:'Vendaval',dmg:80,desc:''},{name:'Hidroimpacto',dmg:130,desc:''}], holo:true, status:null },
+  { id:'r2', name:'Arcanine', emoji:'🐕‍🦺', type:'fire', typeColor:'#f43f5e', hp:100, maxHp:100, energy:['fire'], attacks:[{name:'Llamarada',dmg:60,desc:''},{name:'Extremevelocidad',dmg:90,desc:''}], holo:false, status:null },
+  { id:'r3', name:'Alakazam', emoji:'🔮', type:'psychic', typeColor:'#7c3aed', hp:90, maxHp:90, energy:['psychic'], attacks:[{name:'Teletransporte',dmg:40,desc:''},{name:'Psicorayo',dmg:80,desc:''}], holo:false, status:null },
+  { id:'r4', name:'Machamp', emoji:'💪', type:'fight', typeColor:'#f97316', hp:120, maxHp:120, energy:['fight','fight'], attacks:[{name:'Dynamic Punch',dmg:70,desc:''},{name:'Fist Bomb',dmg:110,desc:''}], holo:false, status:null },
+];
+
+const EMOTES = ['👍','😤','😂','😱','🤔','👏','🔥','💀'];
+const TYPE_COLORS = { fire:'#f43f5e', water:'#0ea5e9', electric:'#eab308', psychic:'#7c3aed', poison:'#a855f7', fight:'#f97316', normal:'#8a8090', grass:'#10b981' };
+
+// ── Util ──────────────────────────────────────────────────────────────────
+
+function hpColor(hp, max) {
+  const r = hp / max;
+  if (r > 0.5) return 'hp-full';
+  if (r > 0.25) return 'hp-mid';
+  return 'hp-low';
+}
+
+function formatTime(s) {
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────
+
+function PBIcon({size=18,opacity=0.35}) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" opacity={opacity}>
+      <circle cx="12" cy="12" r="10" stroke="#c9a227" strokeWidth="1.2"/>
+      <path d="M2 12 Q2 2 12 2 Q22 2 22 12 Z" fill="rgba(244,63,94,0.5)"/>
+      <line x1="2" y1="12" x2="22" y2="12" stroke="#c9a227" strokeWidth="0.8"/>
+      <circle cx="12" cy="12" r="3.5" fill="#0a0a0f" stroke="#c9a227" strokeWidth="0.8"/>
+      <circle cx="12" cy="12" r="1.5" fill="#e8c547"/>
+    </svg>
+  );
+}
+
+function PokeCard({ card, isActive, onClick, isAttacking, isGlowing, isRival }) {
+  if (!card) {
+    return <div className={`poke-card empty-slot${isActive?' active-slot':''}`}><PBIcon /></div>;
+  }
+  const hpPct = (card.hp / card.maxHp) * 100;
+  return (
+    <div
+      className={`poke-card${isActive?' active-slot':''}${card.holo?' holo':''}${isAttacking?' attacking':''}${isGlowing?' glowing':''}`}
+      onClick={onClick}
+      style={{ borderColor: isGlowing ? card.typeColor : undefined, '--gc': card.typeColor+'88' }}
+    >
+      <div className="card-face">
+        <div className="card-header">
+          <span className="card-name">{card.name}</span>
+          <span className="card-hp" style={{ color: hpPct > 50 ? '#10b981' : hpPct > 25 ? '#eab308' : '#f43f5e' }}>{card.hp}</span>
+        </div>
+        <div className={`card-art${isActive?' active-art':''}`}>
+          {card.emoji}
+          <div className="card-type-badge" style={{ background: card.typeColor+'33', color: card.typeColor }}>
+            {card.type === 'fire' ? '🔥' : card.type === 'water' ? '💧' : card.type === 'electric' ? '⚡' : card.type === 'psychic' ? '🔮' : card.type === 'fight' ? '👊' : card.type === 'poison' ? '☠' : '⭐'}
+          </div>
+          {card.status && <span className="card-status">{card.status === 'poison' ? '☠' : card.status === 'burn' ? '🔥' : card.status === 'paralyze' ? '⚡' : '😴'}</span>}
+        </div>
+        <div className="hp-bar"><div className={`hp-fill ${hpColor(card.hp, card.maxHp)}`} style={{ width:`${hpPct}%` }}></div></div>
+        {card.energy.length > 0 && (
+          <div className="card-energy">
+            {card.energy.map((e,i) => <div key={i} className="energy-pip" style={{ background: TYPE_COLORS[e] || '#8a8090' }}></div>)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HandCard({ card, selected, onClick }) {
+  return (
+    <div className={`hand-card${card.holo?' holo':''}${selected?' selected':''}`} onClick={onClick}>
+      <div className="hand-card-art">{card.emoji}</div>
+      <div className="hand-card-name">{card.name}</div>
+    </div>
+  );
+}
+
+function CardZoom({ card, onClose }) {
+  if (!card) return null;
+  return (
+    <div className="card-zoom-overlay" onClick={onClose}>
+      <div className="card-zoom-inner" onClick={e => e.stopPropagation()}>
+        <div className="card-zoom-big">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div className="zoom-card-name">{card.name}</div>
+            <div className="zoom-card-hp">❤️ {card.hp}/{card.maxHp}</div>
+          </div>
+          <div className="zoom-card-art">{card.emoji}</div>
+          <div className="hp-bar" style={{ height:5 }}>
+            <div className={`hp-fill ${hpColor(card.hp, card.maxHp)}`} style={{ width:`${(card.hp/card.maxHp)*100}%` }}></div>
+          </div>
+          <div className="zoom-attack-list">
+            {card.attacks.map((a,i) => (
+              <div key={i} className="zoom-attack">
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <div className="zoom-attack-name">{a.name}</div>
+                  <div className="zoom-attack-dmg">{a.dmg}</div>
+                </div>
+                {a.desc && <div className="zoom-attack-desc">{a.desc}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="zoom-close-hint">Click para cerrar</div>
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const theme = ARENA_THEMES[tweaks.arenaTheme] || ARENA_THEMES.mystic;
+  const intensity = INTENSITY_CONFIG[tweaks.battleIntensity] || INTENSITY_CONFIG.normal;
+  const cardSty = CARD_STYLES[tweaks.cardStyle] || CARD_STYLES.tcg;
+
+  // Apply theme to CSS vars
+  useEffect(() => {
+    const r = document.documentElement.style;
+    r.setProperty('--bg', theme.bg);
+    r.setProperty('--gold', theme.accent);
+    r.setProperty('--gold-l', theme.accent);
+    r.setProperty('--border', theme.divider.replace('0.3','0.18').replace('0.4','0.18'));
+    r.setProperty('--card-back', theme.bg === '#07080f' ? '#1a1c2e' : theme.bg.replace('0f','1a').replace('07','12').replace('00','08'));
+  }, [theme]);
+
+  // Apply pixel style font for pixel mode
+  useEffect(() => {
+    if (tweaks.cardStyle === 'pixel') {
+      if (!document.getElementById('pixel-font')) {
+        const l = document.createElement('link');
+        l.id = 'pixel-font';
+        l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+        document.head.appendChild(l);
+      }
+    }
+  }, [tweaks.cardStyle]);
+
+  // Game state
+  const [myActive, setMyActive] = useState({ ...CARDS[0] });
+  const [myBench, setMyBench] = useState([{ ...CARDS[1] }, { ...CARDS[2] }, null, null, null]);
+  const [myHand, setMyHand] = useState([...CARDS.slice(3)]);
+  const [myDeck, setMyDeck] = useState(42);
+  const [myDiscard, setMyDiscard] = useState([]);
+  const [myPrizes, setMyPrizes] = useState([true,true,true,true,true,true]);
+
+  const [rivalActive, setRivalActive] = useState({ ...RIVAL_CARDS[0] });
+  const [rivalBench, setRivalBench] = useState([{ ...RIVAL_CARDS[1] }, { ...RIVAL_CARDS[2] }, null, null, null]);
+  const [rivalDeck, setRivalDeck] = useState(38);
+  const [rivalPrizes, setRivalPrizes] = useState([true,true,true,true,true,true]);
+
+  const [myTurn, setMyTurn] = useState(true);
+  const [timer, setTimer] = useState(60);
+  const [selectedHand, setSelectedHand] = useState(null);
+  const [attackingCard, setAttackingCard] = useState(null);
+  const [dmgPopups, setDmgPopups] = useState([]);
+  const [turnBanner, setTurnBanner] = useState({ show:true, myTurn:true });
+  const [zoomCard, setZoomCard] = useState(null);
+  const [showSurrender, setShowSurrender] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [rightTab, setRightTab] = useState('log');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [unread, setUnread] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [shakeField, setShakeField] = useState(false);
+  const [glowActive, setGlowActive] = useState(false);
+
+  const logRef = useRef(null);
+
+  const [log, setLog] = useState([
+    { time:'0:00', text:'The battle has begun!', type:'highlight' },
+    { time:'0:00', text:'MistyWave sent out Gyarados.', type:'normal' },
+    { time:'0:01', text:'You sent out Charizard.', type:'normal' },
+  ]);
+
+  const [chat, setChat] = useState([
+    { who:'rival', name:'MistyWave', text:'Good luck! 🤝', time:'0:00' },
+    { who:'me', name:'You', text:"Let's go! 🔥", time:'0:01' },
+  ]);
+  useEffect(() => { if (!drawerOpen) setUnread(true); }, [chat.length]);
+
+  const addLog = useCallback((text, type='normal') => {
+    const mins = Math.floor((60 - timer) / 60);
+    const secs = (60 - timer) % 60;
+    const t = `${mins}:${String(secs).padStart(2,'0')}`;
+    setLog(l => [...l, { time: t, text, type }]);
+    setTimeout(() => { if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, 50);
+  }, [timer]);
+
+  // Timer
+  useEffect(() => {
+    if (!myTurn) return;
+    if (timer <= 0) { endTurn(); return; }
+    const t = setInterval(() => setTimer(x => x - 1), 1000);
+    return () => clearInterval(t);
+  }, [myTurn, timer]);
+
+  // Show turn banner
+  useEffect(() => {
+    setTurnBanner({ show: true, myTurn });
+    const t = setTimeout(() => setTurnBanner(b => ({ ...b, show: false })), 2200);
+    return () => clearTimeout(t);
+  }, [myTurn]);
+
+  // Rival AI turn — intensity-driven delay
+  useEffect(() => {
+    if (myTurn) return;
+    const t = setTimeout(() => {
+      // Rival attacks
+      const dmg = rivalActive.attacks[0].dmg;
+      setAttackingCard('rival');
+      setShakeField(true);
+      setTimeout(() => setShakeField(false), 500);
+
+      setDmgPopups(p => [...p, { id: Date.now(), dmg, x:'35%', y:'55%', color:'#f43f5e' }]);
+      setTimeout(() => setDmgPopups(p => p.filter(x => x.id !== p[0]?.id)), 900);
+
+      setMyActive(a => {
+        const newHp = Math.max(0, a.hp - dmg);
+        addLog(`${rivalActive.name} used ${rivalActive.attacks[0].name}. ${dmg} damage!`, 'damage');
+        return { ...a, hp: newHp };
+      });
+
+      setTimeout(() => {
+        setAttackingCard(null);
+        setMyTurn(true);
+        setTimer(60);
+      }, 800);
+    }, intensity.rivalDelay);
+    return () => clearTimeout(t);
+  }, [myTurn]);
+
+  function endTurn() {
+    setMyTurn(false);
+    setTimer(60);
+    setSelectedHand(null);
+    setGlowActive(false);
+    addLog('You ended your turn.', 'normal');
+  }
+
+  function handleAttack() {
+    if (!myTurn || !myActive) return;
+    const attack = myActive.attacks[0];
+    const dmg = attack.dmg;
+
+    setAttackingCard('my');
+    setGlowActive(false);
+
+    // Burst effect — intensity-driven
+    if (intensity.shake > 0) {
+      setDmgPopups(p => [...p, { id:Date.now(), dmg, x:'52%', y:'38%', color:myActive.typeColor }]);
+      setTimeout(() => setDmgPopups(p => p.slice(1)), 900);
+    }
+
+    if (intensity.shake > 0) {
+      setShakeField(true);
+      setTimeout(() => setShakeField(false), 500);
+    }
+
+    setRivalActive(a => {
+      const newHp = Math.max(0, a.hp - dmg);
+      addLog(`${myActive.name} used ${attack.name}. ${dmg} damage to ${rivalActive.name}!`, 'damage');
+      if (newHp <= 0) addLog(`${rivalActive.name} was knocked out!`, 'highlight');
+      return { ...a, hp: newHp };
+    });
+
+    setTimeout(() => {
+      setAttackingCard(null);
+      setMyTurn(false);
+      setTimer(60);
+    }, 700);
+  }
+
+  function handlePlayCard(card, idx) {
+    if (!myTurn) return;
+    // Put on bench
+    const benchIdx = myBench.findIndex(s => s === null);
+    if (benchIdx === -1) { addLog('The bench is full.', 'normal'); return; }
+    const newBench = [...myBench];
+    newBench[benchIdx] = card;
+    setMyBench(newBench);
+    setMyHand(h => h.filter((_,i) => i !== idx));
+    setSelectedHand(null);
+    addLog(`You sent ${card.name} to the bench.`, 'good');
+    setMyDeck(d => d - 1);
+  }
+
+  function sendChat(text) {
+    if (!text.trim()) return;
+    setChat(c => [...c, { who:'me', name:'You', text, time:'0:01' }]);
+    setChatInput('');
+    // Rival response after delay
+    const replies = ['Interesting move! 🤔','Not so fast! 😤','Hmm... 🔥',"That doesn't affect me! 💧"];
+    setTimeout(() => {
+      setChat(c => [...c, { who:'rival', name:'MistyWave', text: replies[Math.floor(Math.random()*replies.length)], time:'0:02' }]);
+    }, 1500);
+  }
+
+  function sendEmote(e) {
+    setChat(c => [...c, { who:'me', name:'You', text: e, time:'0:01' }]);
+  }
+
+  return (
+    <div className="arena-wrap" style={{
+      background: `radial-gradient(ellipse 120% 80% at 50% 50%, ${theme.glow} 0%, transparent 60%), radial-gradient(ellipse 80% 60% at 20% 80%, ${theme.glow2} 0%, transparent 50%), ${theme.bg}`,
+    }}>
+
+      <TweaksPanel>
+        <div className="twk-sect">Ambiente de Arena</div>
+        <TwkSegment label="Tema" tweakKey="arenaTheme" tweaks={tweaks} setTweak={setTweak}
+          options={[
+            {value:'mystic', label:'Mystic'},
+            {value:'volcano', label:'Volcano'},
+            {value:'abyss', label:'Abismo'},
+            {value:'forest', label:'Bosque'},
+          ]} />
+        <div className="twk-sect">Intensidad de Batalla</div>
+        <TwkSegment label="Animaciones" tweakKey="battleIntensity" tweaks={tweaks} setTweak={setTweak}
+          options={[
+            {value:'calm', label:'Calmo'},
+            {value:'normal', label:'Normal'},
+            {value:'frantic', label:'Frantic'},
+          ]} />
+        <div className="twk-sect">Card Style</div>
+        <TwkSegment label="Design" tweakKey="cardStyle" tweaks={tweaks} setTweak={setTweak}
+          options={[
+            {value:'tcg', label:'TCG'},
+            {value:'holo', label:'Holo'},
+            {value:'pixel', label:'Pixel'},
+          ]} />
+      </TweaksPanel>
+
+      {/* Turn banner */}
+      {turnBanner.show && (
+        <div className={`turn-banner${turnBanner.myTurn?' myturn':' rivalturn'}`}>
+          {turnBanner.myTurn ? 'YOUR TURN!' : 'OPPONENT TURN'}
+        </div>
+      )}
+
+      {/* Damage popups */}
+      {dmgPopups.map(p => (
+        <div key={p.id} className="dmg-popup" style={{ left:p.x, top:p.y, color:p.color, fontSize:32 }}>
+          -{p.dmg}
+        </div>
+      ))}
+
+      {/* Card Zoom */}
+      {zoomCard && <CardZoom card={zoomCard} onClose={() => setZoomCard(null)} />}
+
+      {/* Surrender confirm */}
+      {showSurrender && (
+        <div className="surrender-modal">
+          <div className="surrender-box">
+            <div className="surrender-title">Concede? 🏳️</div>
+            <div className="surrender-sub">If you concede, you will lose the match and your opponent will take all remaining prizes.</div>
+            <div className="surrender-btns">
+              <button className="surrender-yes" onClick={() => window.location.href='Codemon Launcher.html'}>Concede</button>
+              <button className="surrender-no" onClick={() => setShowSurrender(false)}>Seguir luchando</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Help modal */}
+      {showHelp && (
+        <div className="help-modal">
+          <div className="help-box">
+            <div className="help-title">🛡️ Help — How to play</div>
+            {[
+              ['Attack','Select "Attack" so your Active Pokemon attacks the opponent.'],
+              ['Play card','Select a card from your hand and press "Play to bench".'],
+              ['Ver carta','Haz clic sobre cualquier carta para ver sus detalles.'],
+              ['End turn','End your turn without attacking.'],
+              ['Prizes','You take prizes when you knock out opposing Pokemon.'],
+              ['Empty deck','If your deck runs out, you automatically lose!'],
+            ].map(([k,v]) => (
+              <div key={k} className="help-item">
+                <div className="help-key">{k}</div>
+                <div className="help-val">{v}</div>
+              </div>
+            ))}
+            <button className="help-close" onClick={() => setShowHelp(false)}>ENTENDIDO</button>
+          </div>
+        </div>
+      )}
+
+      {/* Topbar */}
+      <div className="topbar">
+        <div className="topbar-logo">CODEMON TCG</div>
+        <div className={`turn-indicator${myTurn?' turn-my':' turn-rival'}`}>
+          <div className="turn-dot"></div>
+          {myTurn ? 'Your turn' : 'Opponent turn'}
+        </div>
+        <div className="topbar-sep"></div>
+        <div className={`timer-pill${timer <= 10 ? ' urgent' : ''}`}>
+          ⏱ {formatTime(timer)}
+        </div>
+        <button className="top-action-btn help" onClick={() => setShowHelp(true)}>? Ayuda</button>
+        <button className="top-action-btn" style={{display:'flex',alignItems:'center',gap:5}} onClick={() => { setDrawerOpen(true); setUnread(false); }}>
+          💬 Chat {unread && <span className="unread-dot"></span>}
+        </button>
+        <button className="top-action-btn danger" onClick={() => setShowSurrender(true)}>🏳 Concede</button>
+        <button className="top-action-btn" onClick={() => window.location.href='Codemon Launcher.html'}>← Salir</button>
+      </div>
+
+      {/* Player info chips */}
+      <div className="player-chip top">
+        <div className="player-avatar">💧</div>
+        <div>
+          <div className="player-name">MistyWave</div>
+          <div className="player-rank">⭐ Rango Oro</div>
+        </div>
+      </div>
+      <div className="player-chip bottom">
+        <div className="player-avatar">🎴</div>
+        <div>
+          <div className="player-name">Entrenador</div>
+          <div className="player-rank">⭐ Rango Oro</div>
+        </div>
+      </div>
+
+      {/* Main area */}
+      <div className="field-area">
+
+        {/* Left side panel */}
+        <div className="side-panel">
+          {/* Rival prizes (top) */}
+          <div className="zone-stack">
+            <div className="zone-label">Opponent prizes</div>
+            <div className="prize-stack">
+              {rivalPrizes.map((p,i) => <div key={i} className={`prize-card${!p?' taken':''}`}></div>)}
+            </div>
+          </div>
+
+          {/* My prizes (bottom) */}
+          <div className="zone-stack" style={{ marginTop:'auto' }}>
+            <div className="zone-label">Mis premios</div>
+            <div className="prize-stack">
+              {myPrizes.map((p,i) => <div key={i} className={`prize-card${!p?' taken':''}`}></div>)}
+            </div>
+          </div>
+        </div>
+
+        {/* Center field */}
+        <div className="center-field" style={{ animation: shakeField ? 'shakeField 0.5s ease' : 'none' }}>
+
+          {/* Rival field (rotated 180) */}
+          <div className="field-half rival">
+            {/* Rival bench */}
+            <div className="field-row">
+              {rivalBench.map((card, i) => (
+                <PokeCard key={i} card={card} isActive={false} onClick={() => card && setZoomCard(card)} isAttacking={false} isGlowing={false} isRival={true} />
+              ))}
+            </div>
+            {/* Rival active */}
+            <div className="field-row">
+              <PokeCard card={rivalActive} isActive={true} onClick={() => setZoomCard(rivalActive)} isAttacking={attackingCard==='rival'} isGlowing={!myTurn} isRival={true} />
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="field-divider"></div>
+
+          {/* My field */}
+          <div className="field-half">
+            {/* My active */}
+            <div className="field-row">
+              <PokeCard card={myActive} isActive={true} onClick={() => setZoomCard(myActive)} isAttacking={attackingCard==='my'} isGlowing={myTurn && glowActive} isRival={false} />
+            </div>
+            {/* My bench */}
+            <div className="field-row">
+              {myBench.map((card, i) => (
+                <PokeCard key={i} card={card} isActive={false} onClick={() => card && setZoomCard(card)} isAttacking={false} isGlowing={false} isRival={false} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right side panel */}
+        <div className="side-panel">
+          {/* Rival deck */}
+          <div className="zone-stack">
+            <div className="zone-label">Opponent deck</div>
+            <div className="card-back"><PBIcon size={24}/></div>
+            <div className="zone-count">{rivalDeck}</div>
+          </div>
+          {/* My deck */}
+          <div className="zone-stack" style={{ marginTop:'auto' }}>
+            <div className="zone-label">Mi mazo</div>
+            <div className="card-back" onClick={() => { if(myTurn){ setMyHand(h=>[...h,{...CARDS[Math.floor(Math.random()*CARDS.length)]}]); setMyDeck(d=>d-1); addLog('Robaste una carta.','good'); } }}><PBIcon size={24}/></div>
+            <div className="zone-count">{myDeck}</div>
+            <div className="zone-label" style={{marginTop:6}}>Descarte</div>
+            <div className="discard-pile">🗑</div>
+            <div className="zone-count">{myDiscard.length}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action bar */}
+      <div className="action-bar">
+        {selectedHand !== null ? (
+          <>
+            <button className="action-btn primary" onClick={() => handlePlayCard(myHand[selectedHand], selectedHand)}>⬆ Play to bench</button>
+            <button className="action-btn secondary" onClick={() => setSelectedHand(null)}>Cancel</button>
+          </>
+        ) : (
+          <>
+            <button className="action-btn attack" disabled={!myTurn} onClick={handleAttack} onMouseEnter={() => setGlowActive(true)} onMouseLeave={() => setGlowActive(false)}>⚔️ Attack</button>
+            <button className="action-btn secondary" disabled={!myTurn} onClick={endTurn}>⏭ End turn</button>
+          </>
+        )}
+      </div>
+
+      {/* Hand */}
+      <div className="hand-area">
+        <div className="hand-label">Mano</div>
+        {myHand.map((card, i) => (
+          <HandCard key={card.id+i} card={card} selected={selectedHand===i} onClick={() => setSelectedHand(selectedHand===i ? null : i)} />
+        ))}
+        <div className="hand-count">{myHand.length}</div>
+      </div>
+
+      {/* Floating drawer toggle */}
+      {!drawerOpen && (
+        <button className="drawer-toggle" onClick={() => { setDrawerOpen(true); setUnread(false); }}>
+          💬 {unread && <span className="unread-dot"></span>} Chat / Log
+        </button>
+      )}
+
+      {/* Overlay */}
+      {drawerOpen && <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />}
+
+      {/* Drawer */}
+      <div className={`drawer-panel${drawerOpen?' open':' closed'}`}>
+        <button className="drawer-close" onClick={() => setDrawerOpen(false)}>✕</button>
+        <div className="rpanel-tabs">
+          <button className={`rtab${rightTab==='log'?' active':''}`} onClick={() => setRightTab('log')}>Historial</button>
+          <button className={`rtab${rightTab==='chat'?' active':''}`} onClick={() => setRightTab('chat')}>Chat</button>
+        </div>
+        <div className="rpanel-body" ref={logRef}>
+          {rightTab === 'log' && log.map((e,i) => (
+            <div key={i} className="log-entry">
+              <span className="log-time">{e.time}</span>
+              <span className={`log-text ${e.type}`}>{e.text}</span>
+            </div>
+          ))}
+          {rightTab === 'chat' && chat.map((m,i) => (
+            <div key={i} className="chat-msg">
+              <span className={`chat-who ${m.who}`}>{m.name}</span>
+              <div className={`chat-bubble ${m.who}`}>{m.text}</div>
+            </div>
+          ))}
+        </div>
+        {rightTab === 'chat' && (
+          <>
+            <div className="emote-row">
+              {EMOTES.map(e => <button key={e} className="emote-btn" onClick={() => sendEmote(e)}>{e}</button>)}
+            </div>
+            <div className="chat-input-row">
+              <input className="chat-input" placeholder="Mensaje..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key==='Enter' && sendChat(chatInput)} />
+              <button className="chat-send" onClick={() => sendChat(chatInput)}>➤</button>
+            </div>
+          </>
+        )}
+      </div>
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

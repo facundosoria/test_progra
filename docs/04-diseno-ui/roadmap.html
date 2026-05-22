@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Codemon TCG — Learning Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06090f;
+  --bg2:#080d18;
+  --panel-bg:#03060c;
+  --text:#b8ccd8;
+  --text2:#4e6270;
+  --text3:#263040;
+  --border:rgba(0,180,255,0.08);
+  --topbar:50px;
+  --panel-w:430px;
+}
+html,body{
+  min-height:100%;background:var(--bg);
+  color:var(--text);font-family:'JetBrains Mono',monospace;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,150,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,150,255,0.018) 1px,transparent 1px);
+  background-size:54px 54px;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:200;
+  height:var(--topbar);
+  background:rgba(4,6,12,0.97);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  display:flex;align-items:center;gap:12px;padding:0 20px;
+}
+.tb-logo{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:900;
+  letter-spacing:0.18em;color:#00d4ff;
+  text-shadow:0 0 22px rgba(0,212,255,0.5);
+  white-space:nowrap;
+}
+.tb-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+.tb-sub{font-size:9.5px;letter-spacing:0.09em;color:var(--text2);white-space:nowrap}
+.tb-gap{flex:1}
+.tb-progress{
+  font-size:9.5px;font-weight:700;letter-spacing:0.07em;color:#00d4ff;
+  border:1px solid rgba(0,212,255,0.2);
+  padding:3px 12px;border-radius:3px;
+  background:rgba(0,212,255,0.05);
+  white-space:nowrap;
+}
+.tb-hint{font-size:9px;color:var(--text3);letter-spacing:0.04em;display:none}
+@media(min-width:640px){.tb-hint{display:block}}
+
+/* ── MAIN SCROLL AREA ── */
+.main{
+  position:relative;z-index:1;
+  transition:padding-right .32s ease;
+  padding:28px 16px 80px;
+}
+.main.panel-open{padding-right:calc(var(--panel-w) + 16px)}
+@media(max-width:640px){.main.panel-open{padding-right:16px}}
+
+/* ── PHASES WRAPPER ── */
+.phases{
+  max-width:1160px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+/* ── PHASE ROW ── */
+.phase{
+  display:flex;
+  gap:0;
+  align-items:stretch;
+  position:relative;
+}
+
+/* Timeline column */
+.ph-tl{
+  width:52px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;padding-top:14px;
+}
+@media(max-width:480px){.ph-tl{width:40px}}
+
+.ph-badge{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--pc,#00d4ff);
+  background:color-mix(in srgb,var(--pc,#00d4ff) 12%,var(--bg));
+  box-shadow:0 0 16px color-mix(in srgb,var(--pc,#00d4ff) 28%,transparent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:900;
+  color:var(--pc,#00d4ff);
+  flex-shrink:0;z-index:1;position:relative;
+}
+@media(max-width:480px){.ph-badge{width:26px;height:26px;font-size:9px}}
+
+/* Vertical connecting line */
+.ph-tl::after{
+  content:'';
+  position:absolute;
+  top:48px;bottom:0;
+  left:50%;transform:translateX(-50%);
+  width:1px;
+  background:linear-gradient(to bottom,
+    color-mix(in srgb,var(--pc,#00d4ff) 35%,transparent),
+    color-mix(in srgb,var(--pc,#00d4ff) 8%,transparent)
+  );
+}
+.phase:last-child .ph-tl::after{display:none}
+
+/* ── PHASE CONTENT ── */
+.ph-content{
+  flex:1;min-width:0;
+  border:1px solid color-mix(in srgb,var(--pc,#00d4ff) 16%,rgba(255,255,255,0.03));
+  border-left:2.5px solid var(--pc,#00d4ff);
+  border-radius:0 8px 8px 0;
+  background:color-mix(in srgb,var(--pc,#00d4ff) 2.5%,rgba(5,8,14,0.92));
+  margin-bottom:0;
+  overflow:hidden;
+}
+
+.ph-hdr{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 16px;
+  background:color-mix(in srgb,var(--pc,#00d4ff) 6%,rgba(3,6,12,0.96));
+  border-bottom:1px solid color-mix(in srgb,var(--pc,#00d4ff) 12%,transparent);
+}
+.ph-title{
+  font-family:'Orbitron',monospace;
+  font-size:10.5px;font-weight:900;letter-spacing:0.1em;
+  color:#daeaf8;
+}
+.ph-sub{
+  font-size:9px;color:var(--text2);margin-left:auto;
+  display:none;
+}
+@media(min-width:700px){.ph-sub{display:block}}
+
+/* regular node grid */
+.ph-body{
+  padding:13px 14px;
+  display:flex;flex-wrap:wrap;gap:7px;
+}
+
+/* ── SPLIT PHASE (Backend / Frontend) ── */
+.ph-tracks{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  border-top:1px solid color-mix(in srgb,var(--pc,#00d4ff) 8%,transparent);
+}
+@media(max-width:620px){
+  .ph-tracks{grid-template-columns:1fr}
+}
+
+.ph-track{
+  padding:12px 14px;
+}
+.ph-track:first-child{
+  border-right:1px solid rgba(255,255,255,0.05);
+}
+@media(max-width:620px){
+  .ph-track:first-child{
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+}
+
+.track-hdr{
+  font-family:'Orbitron',monospace;
+  font-size:8px;font-weight:700;letter-spacing:0.14em;
+  color:var(--tc,#00d4ff);
+  margin-bottom:10px;padding-bottom:7px;
+  border-bottom:1px solid color-mix(in srgb,var(--tc,#00d4ff) 22%,transparent);
+}
+.track-nodes{display:flex;flex-wrap:wrap;gap:7px}
+
+/* ── CONNECTOR between phases ── */
+.ph-connector{
+  display:flex;align-items:center;
+  padding:5px 0;
+  padding-left:25px; /* aligns with badge center */
+  color:rgba(0,200,255,0.2);
+  font-size:14px;line-height:1;
+  position:relative;
+}
+
+/* ════════════════════════════════════════
+   NODE CARDS  — compact redesign
+════════════════════════════════════════ */
+.node{
+  position:relative;
+  width:122px;
+  padding:8px 10px 7px;
+  cursor:pointer;
+
+  background:linear-gradient(148deg,
+    color-mix(in srgb,var(--nc) 7%,#090e1c) 0%,
+    #05090f 100%
+  );
+  border:1px solid color-mix(in srgb,var(--nc) 15%,rgba(255,255,255,0.03));
+  border-left:2px solid var(--nc);
+  border-radius:3px 6px 6px 3px;
+
+  box-shadow:
+    0 -1px 9px color-mix(in srgb,var(--nc) 14%,transparent),
+    0 2px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.025);
+
+  transition:background .15s,border-color .15s,box-shadow .18s,transform .15s;
+  animation:nfade .4s ease both;
+}
+@media(max-width:480px){.node{width:calc(50% - 4px)}}
+@media(max-width:320px){.node{width:100%}}
+
+.node::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(to bottom,
+    color-mix(in srgb,var(--nc) 5%,transparent) 0%,transparent 55%
+  );
+  pointer-events:none;
+}
+
+.node:hover{
+  background:linear-gradient(148deg,
+    color-mix(in srgb,var(--nc) 13%,#0d1428) 0%,
+    #080e1c 100%
+  );
+  border-color:color-mix(in srgb,var(--nc) 55%,transparent);
+  box-shadow:
+    0 -2px 16px color-mix(in srgb,var(--nc) 32%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--nc) 22%,transparent),
+    0 8px 22px color-mix(in srgb,var(--nc) 15%,transparent),
+    inset 0 1px 0 color-mix(in srgb,var(--nc) 14%,rgba(255,255,255,0.04));
+  transform:translateY(-3px) scale(1.03);
+  z-index:10;
+}
+
+.node.active{
+  border-color:var(--nc);
+  box-shadow:
+    0 -3px 20px color-mix(in srgb,var(--nc) 40%,transparent),
+    0 0 0 1.5px var(--nc),
+    0 6px 20px color-mix(in srgb,var(--nc) 18%,transparent);
+  z-index:10;
+}
+.node.done{opacity:.45;filter:saturate(.25)}
+.node.done .n-done-btn{opacity:1;background:var(--nc);border-color:var(--nc);color:#000}
+
+/* icon + title row */
+.n-head{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px}
+.n-icon{font-size:14px;line-height:1;flex-shrink:0;margin-top:1px}
+.n-title{
+  font-family:'Orbitron',monospace;
+  font-size:7.5px;font-weight:700;letter-spacing:0.03em;
+  color:#d5e8f5;line-height:1.35;
+}
+
+/* stars — 40% bigger than original 8px = 11px */
+.n-stars{
+  font-size:11px;letter-spacing:1px;
+  color:var(--nc);line-height:1;
+}
+
+/* done button (shows on hover or when done) */
+.n-done-btn{
+  position:absolute;top:5px;right:5px;
+  width:14px;height:14px;border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--nc) 35%,transparent);
+  background:rgba(0,0,0,0.3);
+  cursor:pointer;font-size:8px;color:transparent;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .15s,background .15s,color .15s;
+}
+.n-done-btn::after{content:'✓'}
+.node:hover .n-done-btn{opacity:1}
+.n-done-btn:hover{border-color:var(--nc);color:var(--nc)}
+
+/* ── DETAIL PANEL ── */
+.panel{
+  position:fixed;top:var(--topbar);right:0;
+  width:var(--panel-w);height:calc(100vh - var(--topbar));
+  background:var(--panel-bg);
+  border-left:1px solid var(--border);
+  transform:translateX(100%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;z-index:300;
+  display:flex;flex-direction:column;
+}
+.panel.open{transform:translateX(0)}
+@media(max-width:600px){:root{--panel-w:100vw}}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:rgba(0,210,255,0.15);border-radius:2px}
+
+.p-hdr{
+  padding:16px 18px 13px;border-bottom:1px solid var(--border);
+  background:rgba(6,10,18,0.97);
+  position:sticky;top:0;z-index:2;
+  display:flex;align-items:flex-start;gap:11px;flex-shrink:0;
+}
+.p-icon{font-size:26px;line-height:1;flex-shrink:0}
+.p-info{flex:1;min-width:0}
+.p-title{
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  letter-spacing:0.06em;color:#d8eaf8;margin-bottom:5px;line-height:1.2;
+}
+.p-badge{
+  display:inline-flex;padding:3px 9px;border-radius:3px;
+  font-family:'Orbitron',monospace;font-size:8px;font-weight:700;letter-spacing:0.11em;
+}
+.p-close{
+  width:26px;height:26px;border-radius:4px;flex-shrink:0;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all .14s;
+}
+.p-close:hover{border-color:var(--text2);color:var(--text)}
+
+.p-body{padding:16px 18px;flex:1}
+.p-sec{margin-bottom:16px}
+.p-sec-title{
+  font-family:'Orbitron',monospace;font-size:8px;font-weight:700;
+  letter-spacing:0.13em;color:var(--text3);
+  margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border);
+}
+.p-meta{display:flex;gap:14px;align-items:flex-start}
+.p-meta label{display:block;font-size:8px;color:var(--text3);margin-bottom:4px;letter-spacing:0.07em}
+
+/* panel stars — 40% bigger than original 14px = ~20px */
+.p-stars{font-size:20px;letter-spacing:2px;line-height:1;color:var(--pc,#00d4ff)}
+
+.p-time{
+  padding:4px 11px;border-radius:4px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  font-size:11px;font-weight:700;color:var(--text);
+}
+.p-desc{font-size:11.5px;line-height:1.72;color:var(--text)}
+.p-why{
+  padding:11px 13px;
+  border-left:2px solid var(--pc,#00d4ff);border-radius:0 5px 5px 0;
+  background:color-mix(in srgb,var(--pc,#00d4ff) 5%,var(--panel-bg));
+  border-top:1px solid color-mix(in srgb,var(--pc,#00d4ff) 11%,transparent);
+  border-right:1px solid color-mix(in srgb,var(--pc,#00d4ff) 11%,transparent);
+  border-bottom:1px solid color-mix(in srgb,var(--pc,#00d4ff) 11%,transparent);
+  font-size:11.5px;line-height:1.65;color:var(--text);
+}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{
+  padding:3px 8px;border-radius:3px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  font-size:10px;color:var(--text2);
+}
+.dlinks{display:flex;flex-direction:column;gap:5px}
+.dlink{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 10px;border-radius:4px;
+  background:rgba(0,210,255,0.04);border:1px solid rgba(0,210,255,0.1);
+  color:#00d4ff;font-size:10px;text-decoration:none;
+  transition:all .14s;
+}
+.dlink:hover{background:rgba(0,210,255,0.08);border-color:rgba(0,210,255,0.25)}
+
+/* ── anim ── */
+@keyframes nfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="tb-logo">CODEMON TCG</span>
+  <span class="tb-sep"></span>
+  <span class="tb-sub">LEARNING ROADMAP</span>
+  <span class="tb-gap"></span>
+  <span class="tb-progress" id="progressEl">0 / 41 completados</span>
+  <span class="tb-sep"></span>
+  <span class="tb-hint">click para detalles · ✓ marcar hecho · ESC cerrar</span>
+</header>
+
+<div class="main" id="main">
+  <div class="phases" id="phases"></div>
+</div>
+
+<aside class="panel" id="panel"></aside>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PHASES — la estructura que ve el lector
+   Cada phase agrupa nodos con una relación semántica clara.
+   El lector ve: "Primero aprendo Fundamentos, luego el Core Stack
+   (Backend y Frontend son pistas paralelas), luego Datos, etc."
+═══════════════════════════════════════════════════════════════ */
+const PHASES = [
+  {
+    id:0, label:'FUNDAMENTOS', color:'#6b82a8',
+    sub:'Herramientas base + forma de trabajar',
+    nodeIds:['git','cli','docker-basic','scrum','pasos','traceability']
+  },
+  {
+    id:1, label:'CORE STACK', color:'#7c3aed',
+    sub:'Backend y Frontend — pistas paralelas independientes',
+    split:true,
+    left:  {label:'BACKEND',  color:'#2563eb', nodeIds:['java21','spring-boot','spring-sec','spring-jpa','rest-api']},
+    right: {label:'FRONTEND', color:'#e11d48', nodeIds:['typescript','angular','rxjs','tailwind','angular-guards']}
+  },
+  {
+    id:2, label:'CAPA DE DATOS', color:'#16a34a',
+    sub:'Persistencia, cache y almacenamiento de objetos',
+    nodeIds:['postgres','flyway','redis','minio']
+  },
+  {
+    id:3, label:'COMUNICACIÓN EN TIEMPO REAL', color:'#0891b2',
+    sub:'WebSocket bidireccional para el juego online',
+    nodeIds:['websocket','stomp','events']
+  },
+  {
+    id:4, label:'TESTING & CALIDAD', color:'#0d9488',
+    sub:'80% cobertura global — 90% motor de juego',
+    nodeIds:['junit','testcontainers','jacoco','playwright']
+  },
+  {
+    id:5, label:'MOTOR DEL JUEGO', color:'#dc2626',
+    sub:'El componente más complejo — requiere todo lo anterior',
+    nodeIds:['tcg-rules','state-machine','game-engine','elo']
+  },
+  {
+    id:6, label:'FEATURES AVANZADAS', color:'#d97706',
+    sub:'Pagos, autenticación social, matchmaking y chat',
+    nodeIds:['mercadopago','oauth2','matchmaking','chat']
+  },
+  {
+    id:7, label:'INFRAESTRUCTURA', color:'#7c3aed',
+    sub:'Deploy con Docker · Nginx gateway · Monitoreo con Prometheus + Grafana',
+    nodeIds:['docker-compose','nginx','env-config','prometheus','grafana','actuator']
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   NODES — datos completos de cada tema
+═══════════════════════════════════════════════════════════════ */
+const NODES_LIST = [
+  // ── FUNDAMENTOS ──
+  {id:'git',icon:'🌿',title:'Git & GitFlow',diff:2,time:'3d',
+   desc:'Sistema de control de versiones distribuido. GitFlow define ramas main/develop/feature/* para coordinar 3 equipos trabajando en paralelo sin pisarse los cambios.',
+   why:'Los 3 equipos (A/B/C) trabajan en paralelo. Sin GitFlow los merges son un caos. Cada Historia de Usuario tiene su feature branch y se integra a develop tras PR review.',
+   concepts:['git branch','git rebase','pull request','GitFlow','merge conflicts','conventional commits','git stash'],
+   links:[{l:'GITFLOW.md',p:'../02-planificacion/00_guia/GITFLOW.md'},{l:'WORKFLOW_DIARIO.md',p:'../02-planificacion/00_guia/WORKFLOW_DIARIO.md'}]},
+
+  {id:'cli',icon:'💻',title:'Terminal & CLI',diff:2,time:'2d',
+   desc:'Dominio de línea de comandos: navegación de ficheros, variables de entorno, pipes, redirecciones y Bash básico. El proyecto incluye scripts en scripts/ que se ejecutan desde terminal.',
+   why:'Todos los comandos del proyecto (docker compose, mvnw, ng, verify_paso.sh) se ejecutan desde terminal. Sin CLI fluida no puedes depurar problemas de contenedores ni correr la suite de tests.',
+   concepts:['bash','env vars','chmod +x','curl','grep','pipes |','ssh','PATH'],
+   links:[{l:'GITHUB_PROJECT_WORKFLOW.md',p:'../02-planificacion/00_guia/GITHUB_PROJECT_WORKFLOW.md'}]},
+
+  {id:'docker-basic',icon:'🐳',title:'Docker Basics',diff:3,time:'3d',
+   desc:'Docker encapsula servicios en contenedores aislados. Docker Compose orquesta los 10 servicios del stack completo con un solo comando. Imágenes multi-stage para builds optimizados.',
+   why:'docker compose up -d --build arranca todo el stack en segundos. Sin entender Docker no puedes levantar el proyecto ni depurar el networking entre servicios (api→postgres, api→redis).',
+   concepts:['image','container','volume','network','Dockerfile','docker compose','healthcheck','multi-stage build','env_file'],
+   links:[{l:'docker-compose.yml',p:'../07-infraestructura/docker-compose.yml'},{l:'Dockerfile.api',p:'../07-infraestructura/Dockerfile.api'}]},
+
+  {id:'scrum',icon:'📅',title:'Scrum — 12 Sprints',diff:2,time:'2d',
+   desc:'Scrum con sprints de 1 semana (lunes-viernes), 3 equipos paralelos (A/B/C) y 12 sprints. Ceremonies: Planning (lunes), Daily, Review+Retro (viernes). Gates de sincronización coordinan dependencias.',
+   why:'Sin entender los sprints y los gates no sabrás en qué puedes trabajar sin bloquear a otro equipo. Ej: el Frontend no integra el tablero real hasta que el GATE 2 (motor completo) esté verde.',
+   concepts:['Sprint','Backlog refinement','Sprint Planning','Daily Scrum','Review','Retrospectiva','DoD','Gates de sincronización','Épicas'],
+   links:[{l:'README.md (planificación)',p:'../02-planificacion/README.md'},{l:'DOD.md',p:'../02-planificacion/04_proceso/DOD.md'}]},
+
+  {id:'pasos',icon:'🤖',title:'Sistema de PASOS',diff:3,time:'2d',
+   desc:'Los PASOS son unidades atómicas de implementación en archivos PASO_S{sprint}_{n}.md. Cada uno define qué construir, los context_files, el contrato y el comando de verificación.',
+   why:'Es el flujo de trabajo principal con IA. En lugar de "implementa el motor de juego", el sistema dice "implementa PASO_S03_01: GameEngine.processAction()". Verificable con ./verify_paso.sh.',
+   concepts:['PASO_*.md structure','context_files loading','contratos de implementación','verify_paso.sh','ESTADO_PASOS.md','HISTORIAL_PASOS.md','CONVENCIONES.md'],
+   links:[{l:'README.md (dev con IA)',p:'../08-desarrollo-con-ia/README.md'},{l:'CONVENCIONES.md',p:'../08-desarrollo-con-ia/CONVENCIONES.md'},{l:'ESTADO_PASOS.md',p:'../08-desarrollo-con-ia/ESTADO_PASOS.md'}]},
+
+  {id:'traceability',icon:'🔗',title:'Trazabilidad HU→Paso',diff:2,time:'1d',
+   desc:'Vincula cada Historia de Usuario con el PASO que la implementa, el PR de GitHub que la mergea y el Gate que la valida. TRAZABILIDAD_PASOS_HU.yml es la fuente de la matriz.',
+   why:'Sin trazabilidad es imposible saber si una HU está implementada. HU-AUTH-03 → PASO_S01_02 → PR #42 → GATE 1a. Los scripts sincronizan automáticamente con GitHub Projects.',
+   concepts:['HU → PASO → PR mapping','TRAZABILIDAD_PASOS_HU.yml','GitHub Projects','sync-traceability-github.sh','Gates de sincronización','burndown tracking'],
+   links:[{l:'TRAZABILIDAD_PASOS_HU.md',p:'../08-desarrollo-con-ia/TRAZABILIDAD_PASOS_HU.md'}]},
+
+  // ── BACKEND ──
+  {id:'java21',icon:'☕',title:'Java 21',diff:3,time:'1w',
+   desc:'Java 21 LTS es el lenguaje del backend. Records para DTOs inmutables, Pattern Matching, Virtual Threads (Project Loom) para alta concurrencia sin overhead de hilos tradicionales.',
+   why:'Todo el backend está en Java 21. El motor de juego maneja múltiples partidas concurrentes; Virtual Threads reducen dramáticamente el overhead de I/O bloqueante en las WebSocket sessions.',
+   concepts:['Records','Sealed classes','Pattern Matching instanceof','Stream API','Optional','Virtual Threads','Text Blocks','Switch expressions'],
+   links:[{l:'TECNOLOGIAS.md',p:'../01-producto/TECNOLOGIAS.md'}]},
+
+  {id:'spring-boot',icon:'🍃',title:'Spring Boot 3',diff:3,time:'1w',
+   desc:'Framework principal del backend. Inyección de dependencias, autoconfiguración, perfiles dev/prod y Actuator para health checks y métricas. Módulos de dominio independientes.',
+   why:'Cada funcionalidad (auth, motor, tienda) es un módulo Spring. Sin entender el ciclo de vida de los beans y las anotaciones no puedes trabajar en ninguna parte del backend.',
+   concepts:['@SpringBootApplication','@Service','@Configuration','application.yml','profiles','Actuator','Starters','Lombok','@Transactional','@Scheduled'],
+   links:[{l:'TECNOLOGIAS.md',p:'../01-producto/TECNOLOGIAS.md'},{l:'CODEMON_GUIAS_TECNICAS.md',p:'../05-referencia-tecnica/CODEMON_GUIAS_TECNICAS.md'}]},
+
+  {id:'spring-sec',icon:'🔐',title:'Spring Security + JWT',diff:4,time:'1w',
+   desc:'Autenticación JWT sin estado + 2FA por email. JwtAuthFilter intercepta cada request. Refresh token para sesiones largas. SecurityFilterChain define rutas públicas vs protegidas.',
+   why:'Primer módulo del Sprint 1. Sin auth funcional ningún equipo puede integrar endpoints reales. El 2FA es un requisito no opcional y requiere coordinar con Gmail App Password.',
+   concepts:['JWT','JwtAuthFilter','SecurityFilterChain','stateless session','2FA flow','refresh token','BCryptPasswordEncoder','SecurityContext','@PreAuthorize'],
+   links:[{l:'EPIC-01-AUTH',p:'../02-planificacion/03_epicas/EPIC-01-AUTH/EPIC.md'},{l:'PASO_S01_01.md',p:'../08-desarrollo-con-ia/pasos/PASO_S01_01.md'}]},
+
+  {id:'spring-jpa',icon:'🗄️',title:'Spring Data JPA',diff:3,time:'1w',
+   desc:'Abstracción sobre PostgreSQL mediante Hibernate. Las entidades mapean las 21 tablas del schema. JpaRepository genera CRUD automáticamente. @ManyToMany/@OneToMany modelan colecciones y mazos.',
+   why:'El schema tiene 21 tablas con relaciones complejas. @Transactional es crítico en el motor de juego para garantizar consistencia de estado. Un bug de LazyInitialization rompe partidas en curso.',
+   concepts:['@Entity','@Id','@ManyToMany','@OneToMany','JpaRepository','JPQL','@Query','@Transactional','FetchType.LAZY','CascadeType'],
+   links:[{l:'BD_Y_TABLAS.md',p:'../05-referencia-tecnica/BD_Y_TABLAS.md'},{l:'SCHEMA_BD.sql',p:'../05-referencia-tecnica/SCHEMA_BD.sql'}]},
+
+  {id:'rest-api',icon:'🌐',title:'REST API Design',diff:3,time:'3d',
+   desc:'APIs REST con verbos HTTP correctos, códigos de respuesta apropiados, DTOs con @Valid y documentación OpenAPI automática. GlobalExceptionHandler unifica el manejo de errores.',
+   why:'Los contratos en CONTRATOS_API.md son la interfaz entre backend y frontend. Cambiar una firma sin actualizar el contrato rompe la integración entre equipos. Swagger es la fuente de verdad.',
+   concepts:['@RestController','@RequestMapping','ResponseEntity','@Valid','DTO pattern','@ControllerAdvice','ProblemDetail (RFC 9457)','OpenAPI/Swagger','Pageable'],
+   links:[{l:'CONTRATOS_API.md',p:'../05-referencia-tecnica/CONTRATOS_API.md'}]},
+
+  // ── FRONTEND ──
+  {id:'typescript',icon:'📘',title:'TypeScript Strict',diff:3,time:'4d',
+   desc:'TypeScript en strict mode: strictNullChecks, noImplicitAny, strictPropertyInitialization. Elimina errores en runtime que en JS aparecerían solo en producción.',
+   why:'tsconfig.json con "strict": true. Los tipos del estado del juego (tablero, mano, pila de descarte) son complejos con generics. Sin tipado los bugs del tablero aparecen solo en runtime.',
+   concepts:['strict mode','interface vs type','generics','type guards','union types','readonly','discriminated unions','utility types: Partial/Omit/Pick'],
+   links:[{l:'TECNOLOGIAS.md',p:'../01-producto/TECNOLOGIAS.md'},{l:'MOCKS_FRONTEND.md',p:'../05-referencia-tecnica/MOCKS_FRONTEND.md'}]},
+
+  {id:'angular',icon:'⚡',title:'Angular 21 Standalone',diff:4,time:'1w',
+   desc:'Angular 21 con Standalone Components (sin NgModule). Routing protege rutas con Guards. DI provee servicios singleton. Signals es el nuevo sistema reactivo que reemplaza a ngZone.',
+   why:'Toda la UI está en Angular: tablero de batalla, deck builder con drag-and-drop, lobby de matchmaking. Sin entender DI y lifecycle hooks no puedes implementar ninguna pantalla.',
+   concepts:['standalone components','RouterOutlet','ActivatedRoute','inject()','lifecycle hooks','signals','input()/output()','HttpClient','ChangeDetectionStrategy.OnPush'],
+   links:[{l:'Codemon_Game_Lobby.html',p:'Codemon_Game_Lobby.html'},{l:'PASO_S00_03.md',p:'../08-desarrollo-con-ia/pasos/PASO_S00_03.md'}]},
+
+  {id:'rxjs',icon:'🔄',title:'RxJS',diff:4,time:'4d',
+   desc:'Programación reactiva de Angular. Observables modelan flujos asíncronos: HTTP, WebSocket, eventos de usuario. Operadores como switchMap, takeUntil y combineLatest son fundamentales.',
+   why:'Los mensajes WebSocket del juego son un stream continuo de eventos. WebSocketService usa BehaviorSubject para compartir estado entre componentes. Sin RxJS el tablero no actualiza en tiempo real.',
+   concepts:['Observable','Subject','BehaviorSubject','switchMap','mergeMap','takeUntil','combineLatest','catchError','async pipe','shareReplay'],
+   links:[{l:'PROTOCOLO_WEBSOCKET.md',p:'../05-referencia-tecnica/PROTOCOLO_WEBSOCKET.md'}]},
+
+  {id:'tailwind',icon:'🎨',title:'Tailwind CSS 3',diff:2,time:'3d',
+   desc:'CSS utility-first: en lugar de .card{padding:16px} usas p-4. Resultado predecible, sin conflictos de especificidad y responsive por defecto con prefijos sm/md/lg.',
+   why:'Convención del proyecto: Tailwind-first, nunca CSS custom excepto via @apply. Tablero, tienda y lobby deben verse cohesivos. Mezclar estilos viola las convenciones del proyecto.',
+   concepts:['utility classes','responsive prefixes (sm/md/lg)','hover/focus states','@apply','tailwind.config.js','arbitrary values [value]','gap/flex/grid'],
+   links:[{l:'TECNOLOGIAS.md',p:'../01-producto/TECNOLOGIAS.md'}]},
+
+  {id:'angular-guards',icon:'🛡️',title:'Guards & Interceptors',diff:3,time:'3d',
+   desc:'Guards (CanActivate) redirigen a /login si no hay sesión. HttpInterceptor inyecta JWT en cada request y maneja refresh automático cuando expira (401 → refresh → retry).',
+   why:'Un bug en el interceptor genera un ciclo infinito de redirects que bloquea toda la app. Es código compartido que afecta a TODAS las llamadas API del frontend.',
+   concepts:['CanActivate','HttpInterceptor','HTTP_INTERCEPTORS','Authorization header','JWT expiry','refresh token flow','401 handling','Router.navigate'],
+   links:[{l:'EPIC-01-AUTH',p:'../02-planificacion/03_epicas/EPIC-01-AUTH/EPIC.md'}]},
+
+  // ── DATOS ──
+  {id:'postgres',icon:'🐘',title:'PostgreSQL 16',diff:3,time:'1w',
+   desc:'BD principal con 21 tablas. Usa JSONB para el estado completo de cada partida en curso y TEXT[] para listas de IDs de cartas. Vistas materializadas para el leaderboard.',
+   why:'La tabla game_state guarda el estado de partidas como JSONB. El ELO y leaderboard dependen de consultas eficientes. Las 15 migraciones Flyway deben ejecutarse en orden estricto.',
+   concepts:['JSONB','TEXT[]','foreign keys','GIN index','EXPLAIN ANALYZE','materialized views','transactions ACID','psql CLI'],
+   links:[{l:'BD_Y_TABLAS.md',p:'../05-referencia-tecnica/BD_Y_TABLAS.md'},{l:'SCHEMA_BD.sql',p:'../05-referencia-tecnica/SCHEMA_BD.sql'}]},
+
+  {id:'flyway',icon:'📋',title:'Flyway Migrations',diff:2,time:'2d',
+   desc:'Versiona el schema de BD con archivos SQL numerados (V1__create_users.sql…). Al arrancar Spring Boot, aplica automáticamente las migraciones pendientes.',
+   why:'15 migraciones planificadas. Si un developer crea una tabla a mano en local desincroniza su ambiente del resto del equipo. Flyway garantiza que todos tengan exactamente el mismo schema.',
+   concepts:['V{n}__desc.sql','R__repeatable.sql','flyway_schema_history','spring.flyway.*','baseline','repair','checksum validation'],
+   links:[{l:'PASO_S00_02.md',p:'../08-desarrollo-con-ia/pasos/PASO_S00_02.md'},{l:'BD_Y_TABLAS.md',p:'../05-referencia-tecnica/BD_Y_TABLAS.md'}]},
+
+  {id:'redis',icon:'⚡',title:'Redis 7',diff:3,time:'4d',
+   desc:'Redis en modo AOF. Almacena sesiones WebSocket activas, cola de matchmaking por ELO, cooldowns de acciones y el ranking en vivo con Sorted Sets.',
+   why:'El matchmaking usa un Sorted Set con ELO como score. El leaderboard top 100 se lee de Redis (no PG) para respuestas <5ms. Presencia de usuarios en lobby con TTL automático.',
+   concepts:['Sorted Sets ZADD/ZRANGEBYSCORE','String SET/GET/TTL','List LPUSH/RPOP','Hash','RedisTemplate','pub/sub','EXPIRE'],
+   links:[{l:'PATRONES_REDIS.md',p:'../05-referencia-tecnica/PATRONES_REDIS.md'}]},
+
+  {id:'minio',icon:'🪣',title:'MinIO Object Storage',diff:2,time:'2d',
+   desc:'Servidor S3-compatible para 292 imágenes de cartas (146 × 2 tamaños: small y large). Bucket codemon-cards público, accesible desde Nginx en /minio/*.',
+   why:'Cada carta en catálogo, deck builder y tablero carga su imagen desde MinIO a través de Nginx. Sin MinIO configurado con imágenes cargadas, todas las cartas aparecen rotas en toda la app.',
+   concepts:['bucket','object','presigned URLs','S3 API','MinIO SDK Java','mc CLI','bucket policy read-only','CORS'],
+   links:[{l:'CARTAS_E_IMAGENES.md',p:'../05-referencia-tecnica/CARTAS_E_IMAGENES.md'}]},
+
+  // ── TIEMPO REAL ──
+  {id:'websocket',icon:'🔌',title:'WebSocket Protocol',diff:3,time:'3d',
+   desc:'Protocolo full-duplex sobre TCP persistente. Servidor y cliente envían mensajes en cualquier momento sin nueva solicitud. SockJS provee fallback para browsers sin WS nativo.',
+   why:'Todo el juego en tiempo real usa WebSocket. HTTP polling no es viable — 500ms+ de latencia arruina el combate. La config del proxy en Nginx (headers Upgrade + Connection) es crítica.',
+   concepts:['handshake HTTP→WS','full-duplex','ping/pong heartbeat','close frame','SockJS fallback','WS vs WSS','connection lifecycle'],
+   links:[{l:'PROTOCOLO_WEBSOCKET.md',p:'../05-referencia-tecnica/PROTOCOLO_WEBSOCKET.md'}]},
+
+  {id:'stomp',icon:'📡',title:'STOMP + SockJS',diff:4,time:'3d',
+   desc:'STOMP sobre WebSocket. Topics públicos (/topic/game.{id}) y colas privadas (/user/queue/events). @MessageMapping maneja entrantes, SimpMessagingTemplate envía respuestas.',
+   why:'El motor envía cada acción (ataque, retirada, fin de turno) como evento STOMP al topic de la partida. Ambos jugadores suscritos actualizan estado local al recibirlo.',
+   concepts:['@MessageMapping','@SendTo','@SendToUser','SimpMessagingTemplate','/topic/ vs /user/queue/','STOMP headers','StompJS browser'],
+   links:[{l:'PROTOCOLO_WEBSOCKET.md',p:'../05-referencia-tecnica/PROTOCOLO_WEBSOCKET.md'}]},
+
+  {id:'events',icon:'🎯',title:'Event-Driven Design',diff:4,time:'3d',
+   desc:'Arquitectura orientada a eventos: "qué pasó" vs "qué hacer". GameEventPublisher publica eventos tipados (CardDrawnEvent, AttackEvent) que los handlers convierten en mensajes STOMP.',
+   why:'El motor NO habla directamente con WebSocket. Esto permite testear la lógica del juego sin WebSocket activo, y añadir nuevos canales (logs, replay) sin modificar el motor.',
+   concepts:['events vs commands','GameEventPublisher','ApplicationEventPublisher','pub/sub pattern','event envelope (type+payload+ts)','private vs broadcast'],
+   links:[{l:'PROTOCOLO_WEBSOCKET.md',p:'../05-referencia-tecnica/PROTOCOLO_WEBSOCKET.md'},{l:'06-system-logic.md',p:'../06-reglas-juego/06-system-logic.md'}]},
+
+  // ── TESTING ──
+  {id:'junit',icon:'🧪',title:'JUnit 5 + Mockito',diff:3,time:'4d',
+   desc:'JUnit 5 para tests unitarios, Mockito para aislar la unidad bajo test con dobles de prueba. El patrón Given/When/Then estructura cada test de forma legible.',
+   why:'Cobertura mínima 80% global y 90% en game.engine. El motor tiene 200+ casos de prueba. Mockito aísla GameEngine de PostgreSQL y Redis para velocidad de ejecución.',
+   concepts:['@Test','@BeforeEach','@Mock','@InjectMocks','verify()','ArgumentCaptor','when().thenReturn()','doThrow()','Given/When/Then','assertThrows()'],
+   links:[{l:'EPIC-11-CALIDAD',p:'../02-planificacion/03_epicas/EPIC-11-CALIDAD/EPIC.md'}]},
+
+  {id:'testcontainers',icon:'🐋',title:'Testcontainers',diff:3,time:'3d',
+   desc:'Arranca contenedores Docker reales durante los tests de integración. Usa PostgreSQL real con schema Flyway aplicado, en lugar de mockear la base de datos.',
+   why:'Evitó bugs donde queries funcionaban con H2 en memoria pero fallaban con PostgreSQL real por diferencias de SQL dialect. Los tests de repositorios de cartas y mazos lo usan.',
+   concepts:['@Testcontainers','@Container','PostgreSQLContainer','DynamicPropertySource','@SpringBootTest','Flyway en tests','ryuk cleanup container'],
+   links:[{l:'PASO_S03_01.md',p:'../08-desarrollo-con-ia/pasos/PASO_S03_01.md'}]},
+
+  {id:'jacoco',icon:'📈',title:'JaCoCo Coverage',diff:2,time:'1d',
+   desc:'Analiza el bytecode Java durante tests y genera un reporte HTML de cobertura. Plugin Maven con umbrales configurados que hacen fallar el build si no se alcanzan.',
+   why:'Umbrales obligatorios: 80% global y 90% para el paquete game.engine. Si baja del umbral, mvn verify falla y el PR no puede mergearse. El reporte muestra exactamente qué falta.',
+   concepts:['line coverage','branch coverage','jacoco:report','jacoco:check','exclusions (DTOs)','mvn verify','coverage gates','missed branches'],
+   links:[{l:'DOD.md',p:'../02-planificacion/04_proceso/DOD.md'}]},
+
+  {id:'playwright',icon:'🎭',title:'Playwright E2E',diff:4,time:'4d',
+   desc:'Automatiza browsers reales para tests end-to-end. Simula un usuario real: login → lobby → matchmaking → jugar una carta. Detecta regresiones visuales que los tests unitarios no capturan.',
+   why:'Smoke test del Sprint 11: register→verify email→login→lobby→matchmaking→turno. Puede correr dos browsers simultáneos para simular el PvP real. Sin E2E el producto no está listo.',
+   concepts:['page.goto()','page.click()','page.fill()','expect(locator).toBeVisible()','fixtures','page objects pattern','screenshot on failure'],
+   links:[{l:'CHECKLIST_ENTREGA.md',p:'../02-planificacion/02_sprints/CHECKLIST_ENTREGA.md'}]},
+
+  // ── GAME ENGINE ──
+  {id:'tcg-rules',icon:'🃏',title:'TCG Rules — Set XY1',diff:5,time:'1w',
+   desc:'Reglas del Trading Card Game (set XY1): mazo de 60 cartas, setup inicial (6 premios, Pokémon activo), estructura de turno (robar, adjuntar energía, atacar), condiciones de victoria.',
+   why:'Sin entender las reglas a fondo no puedes implementar ni validar ninguna acción del motor. El proyecto tiene 7 archivos de reglas que son la especificación y la fuente de verdad del Equipo A.',
+   concepts:['mazo 60 cartas','setup + mulligan','Pokémon Activo/Banca','cartas de premio (6)','fases de turno','adjuntar Energía','calcular daño','condiciones de victoria'],
+   links:[{l:'REGLAS_INDEX.md',p:'../06-reglas-juego/REGLAS_INDEX.md'},{l:'01-setup.md',p:'../06-reglas-juego/01-setup.md'},{l:'02-turn-flow.md',p:'../06-reglas-juego/02-turn-flow.md'},{l:'03-combat.md',p:'../06-reglas-juego/03-combat.md'}]},
+
+  {id:'state-machine',icon:'⚙️',title:'State Machine',diff:5,time:'1w',
+   desc:'El juego es una máquina de estados finitos: SetupState → DrawPhase → MainPhase → AttackPhase → EndPhase → (siguiente turno o GameOver). Cada estado define qué acciones son válidas.',
+   why:'Garantiza consistencia: no puedes robar dos veces en un turno ni atacar sin energía. Cualquier bug en las transiciones crea exploits que arruinan el juego competitivo.',
+   concepts:['State enum','GamePhase','transition guards','GameAction validation','illegal state detection','State pattern (GoF)','GameContext','immutable state snapshots'],
+   links:[{l:'PATRONES_DISENO.md',p:'../05-referencia-tecnica/PATRONES_DISENO.md'}]},
+
+  {id:'game-engine',icon:'🎮',title:'GameEngine Architecture',diff:5,time:'2w',
+   desc:'El componente más complejo. Facade coordinando: AttackPipeline (middlewares), DamageCalculator (resistencias, debilidades), StatusEffectManager (veneno, quemadura, confusión) y VictoryConditionChecker.',
+   why:'Requiere ≥90% de cobertura de tests (el umbral más alto del proyecto). El patrón CardHandler (Strategy) permite efectos especiales por carta sin modificar el motor.',
+   concepts:['Facade pattern','Strategy pattern (CardHandler)','Pipeline pattern','processAction()','DamageCalculator','StatusEffectManager','VictoryConditionChecker','GameEventPublisher'],
+   links:[{l:'GAME_ENGINE_DETALLES.md',p:'../05-referencia-tecnica/GAME_ENGINE_DETALLES.md'},{l:'GAME_ENGINE_DETALLES_PARTE2.md',p:'../05-referencia-tecnica/GAME_ENGINE_DETALLES_PARTE2.md'},{l:'PATRON_CARD_HANDLER.md',p:'../05-referencia-tecnica/PATRON_CARD_HANDLER.md'}]},
+
+  {id:'elo',icon:'📊',title:'ELO Rating System',diff:3,time:'2d',
+   desc:'Sistema de rating competitivo. Cada victoria/derrota ajusta el rating según la diferencia de habilidad esperada. Matchmaking empareja jugadores con ELO similar (rango ±200 puntos).',
+   why:'El leaderboard global y las partidas ranked dependen del ELO. El matchmaking usa Redis Sorted Set con ELO como score. El cálculo ocurre en backend al cerrar cada partida.',
+   concepts:['K-factor','expected score formula','rating delta','provisional rating','Redis ZADD/ZRANGEBYSCORE','MatchResult processing','leaderboard pagination'],
+   links:[{l:'EPIC-05-MULTIJUGADOR',p:'../02-planificacion/03_epicas/EPIC-05-MULTIJUGADOR/EPIC.md'}]},
+
+  // ── ADVANCED ──
+  {id:'mercadopago',icon:'💳',title:'Mercado Pago API',diff:4,time:'4d',
+   desc:'Integración para compra de Codemones (moneda virtual). Flujo: crear preferencia → checkout MP → webhook de confirmación → acreditar wallet. Idempotencia crítica.',
+   why:'Los webhooks son idempotentes — MP puede re-enviarlos. La acreditación ocurre SOLO tras confirmación del webhook, no del redirect del browser. MP_ACCESS_TOKEN en .env debe ser de sandbox.',
+   concepts:['MercadoPago SDK','Preference (checkout)','webhook handler','idempotency key','sandbox vs production','payment status: approved/rejected/pending'],
+   links:[{l:'EPIC-07-TIENDA',p:'../02-planificacion/03_epicas/EPIC-07-TIENDA/EPIC.md'}]},
+
+  {id:'oauth2',icon:'🔑',title:'OAuth2 Social Login',diff:4,time:'3d',
+   desc:'Autenticación con cuentas Google/GitHub. Spring Security OAuth2 Client maneja el flujo: redirect → código de autorización → token → datos del usuario.',
+   why:'Sprint 10. Spring Security tiene soporte nativo. El desafío está en vincular la cuenta OAuth con un usuario existente en la BD o crear uno nuevo si es el primer login.',
+   concepts:['authorization code flow','OAuth2Client','UserInfo endpoint','OAuth2User','redirect URI','spring.security.oauth2.client.*','account linking'],
+   links:[{l:'EPIC-01-AUTH',p:'../02-planificacion/03_epicas/EPIC-01-AUTH/EPIC.md'}]},
+
+  {id:'matchmaking',icon:'⚔️',title:'Matchmaking System',diff:4,time:'3d',
+   desc:'Cola Redis Sorted Set con ELO como score. Cada 5s busca pares con diferencia ≤200 ELO. Soporta salas privadas con código. Room lifecycle: WAITING → MATCHED → IN_GAME → FINISHED.',
+   why:'Sin matchmaking no hay partidas PvP. Los eventos de sala se publican por WebSocket para que el lobby actualice en tiempo real. Timeout de 5min cancela la búsqueda y notifica.',
+   concepts:['Redis Sorted Set para cola','@Scheduled polling','GameRoom lifecycle','private room codes','WebSocket room events','timeout handling','graceful disconnect'],
+   links:[{l:'PATRONES_REDIS.md',p:'../05-referencia-tecnica/PATRONES_REDIS.md'}]},
+
+  {id:'chat',icon:'💬',title:'Chat & Notifications',diff:3,time:'3d',
+   desc:'Chat in-game con colas STOMP privadas (/user/queue/chat). Notificaciones (turno listo, solicitud de amistad, resultado de partida) por el mismo canal con tipo diferente en el payload JSON.',
+   why:'Sin notificaciones el jugador no sabe cuándo es su turno al cambiar de pantalla. Badges de no-leídas en Redis que se limpian al marcar como leídas.',
+   concepts:['/user/queue/ channels','message type discrimination','notification badge counter','read/unread state','Redis notification store','toast notifications'],
+   links:[{l:'PROTOCOLO_WEBSOCKET.md',p:'../05-referencia-tecnica/PROTOCOLO_WEBSOCKET.md'}]},
+
+  // ── INFRAESTRUCTURA ──
+  {id:'docker-compose',icon:'🐳',title:'Docker Compose',diff:3,time:'3d',
+   desc:'docker-compose.yml orquesta los 10 servicios del stack. depends_on con condition: service_healthy garantiza el arranque ordenado. El overlay prod añade SSL sin modificar el base.',
+   why:'depends_on + service_healthy previene que la API arranque antes que PostgreSQL. Entender el networking interno es esencial para depurar conexiones entre servicios.',
+   concepts:['services','volumes','networks','depends_on','healthcheck','condition: service_healthy','overlay files','multi-stage Dockerfile','restart policy'],
+   links:[{l:'docker-compose.yml',p:'../07-infraestructura/docker-compose.yml'},{l:'Dockerfile.api',p:'../07-infraestructura/Dockerfile.api'},{l:'Dockerfile.front',p:'../07-infraestructura/Dockerfile.front'}]},
+
+  {id:'nginx',icon:'🔀',title:'Nginx Gateway',diff:4,time:'3d',
+   desc:'Gateway unificado en puerto 8088 (local) y 443 (prod). Enruta /→Angular SPA, /api/*→Spring Boot, /ws/→WebSocket STOMP, /minio/*→MinIO. Termina TLS en producción.',
+   why:'La config del proxy WebSocket (headers Upgrade + Connection) es CRÍTICA — sin ella el juego en tiempo real no funciona. Sin Nginx el browser necesitaría conocer 4 puertos distintos.',
+   concepts:['location blocks','proxy_pass','Upgrade header WS','ssl_certificate','http→https redirect','gzip compression','try_files SPA fallback','upstream'],
+   links:[{l:'nginx.conf',p:'../07-infraestructura/nginx.conf'},{l:'GATEWAY_LOCAL.md',p:'../07-infraestructura/GATEWAY_LOCAL.md'},{l:'GATEWAY_PRODUCCION_HTTPS.md',p:'../07-infraestructura/GATEWAY_PRODUCCION_HTTPS.md'}]},
+
+  {id:'env-config',icon:'🔧',title:'Env Vars & Config',diff:2,time:'1d',
+   desc:'Variables de entorno en .env configuran credenciales de BD, JWT secret, email SMTP, MinIO y Mercado Pago. Nunca se commitean. Spring Boot las lee en application.yml.',
+   why:'Sin EMAIL_USERNAME/PASSWORD el 2FA no funciona. Sin MP_ACCESS_TOKEN la tienda no procesa pagos. JWT_SECRET requiere ≥32 caracteres o Spring Security rechaza la configuración.',
+   concepts:['.env vs .env.example','Docker env_file','application.yml profiles','${VAR:default}','spring.profiles.active','12-factor app config'],
+   links:[{l:'GATEWAY_LOCAL.md',p:'../07-infraestructura/GATEWAY_LOCAL.md'}]},
+
+  {id:'prometheus',icon:'📊',title:'Prometheus',diff:3,time:'2d',
+   desc:'Recolecta métricas de todos los servicios cada 15s. Spring Boot expone en /actuator/prometheus. postgres_exporter y redis_exporter traducen métricas nativas al formato Prometheus.',
+   why:'Fuente de datos de los 4 dashboards de Grafana. Las alertas notifican cuando la latencia sube o la BD se satura. Retiene 30 días de histórico de métricas.',
+   concepts:['scrape_interval','targets','PromQL (rate/sum/avg)','counter vs gauge vs histogram','/actuator/prometheus','labels','exporters','alerting rules'],
+   links:[{l:'prometheus.yml',p:'../07-infraestructura/prometheus.yml'},{l:'MONITOREO.md',p:'../05-referencia-tecnica/MONITOREO.md'}]},
+
+  {id:'grafana',icon:'📈',title:'Grafana Dashboards',diff:2,time:'2d',
+   desc:'Visualiza métricas de Prometheus. 4 dashboards provisionados: Negocio (partidas activas, registros, pagos), Sistema (CPU, latencia), PostgreSQL y Redis.',
+   why:'El dashboard de negocio muestra KPIs reales: sobres abiertos, Codemones en circulación. Si las partidas activas caen a 0 en horario pico, algo falló. Es el panel de control de operaciones.',
+   concepts:['data source','panel types (graph/stat/table)','PromQL en Grafana','dashboard variables','alerting','provisioning via YAML','annotations'],
+   links:[{l:'grafana-datasource.yml',p:'../07-infraestructura/grafana-datasource.yml'},{l:'MONITOREO.md',p:'../05-referencia-tecnica/MONITOREO.md'}]},
+
+  {id:'actuator',icon:'🩺',title:'Spring Actuator',diff:2,time:'1d',
+   desc:'Expone /actuator/health, /actuator/metrics, /actuator/prometheus. Micrometer permite añadir métricas de negocio custom. Docker Compose depende de /health para el healthcheck.',
+   why:'El healthcheck de Docker Compose usa /actuator/health. Sin este endpoint, depends_on: condition: service_healthy no funciona y los servicios arrancan antes que la API esté lista.',
+   concepts:['/actuator/health','/actuator/metrics','/actuator/prometheus','MeterRegistry','@Timed','Counter','Gauge','HealthIndicator custom'],
+   links:[{l:'MONITOREO.md',p:'../05-referencia-tecnica/MONITOREO.md'}]},
+];
+
+// Index por id para lookup rápido
+const NODES = Object.fromEntries(NODES_LIST.map(n => [n.id, n]));
+const TOTAL = NODES_LIST.length;
+
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let activeId = null;
+function getDone() { return JSON.parse(localStorage.getItem('rm-v3-done') || '[]'); }
+function saveDone(d) { localStorage.setItem('rm-v3-done', JSON.stringify(d)); }
+
+/* ─────────────────────────────────────────
+   RENDER NODE HTML
+───────────────────────────────────────── */
+function nodeHTML(id, color) {
+  const n = NODES[id];
+  if (!n) return '';
+  const done = getDone().includes(id);
+  const stars = '★'.repeat(n.diff) + '☆'.repeat(5 - n.diff);
+  return `
+    <div class="node${done ? ' done' : ''}" data-id="${id}" style="--nc:${color}">
+      <div class="n-head">
+        <span class="n-icon">${n.icon}</span>
+        <span class="n-title">${n.title}</span>
+      </div>
+      <div class="n-stars">${stars}</div>
+      <button class="n-done-btn" title="Marcar completado"></button>
+    </div>`;
+}
+
+/* ─────────────────────────────────────────
+   BUILD PHASES
+───────────────────────────────────────── */
+function buildPhases() {
+  const container = document.getElementById('phases');
+
+  PHASES.forEach((ph, pi) => {
+    // connector between phases
+    if (pi > 0) {
+      const conn = document.createElement('div');
+      conn.className = 'ph-connector';
+      conn.innerHTML = '▼';
+      container.appendChild(conn);
+    }
+
+    const row = document.createElement('div');
+    row.className = 'phase';
+    row.style.setProperty('--pc', ph.color);
+
+    // body HTML
+    let bodyHTML;
+    if (ph.split) {
+      const leftNodes = ph.left.nodeIds.map(id => nodeHTML(id, ph.left.color)).join('');
+      const rightNodes = ph.right.nodeIds.map(id => nodeHTML(id, ph.right.color)).join('');
+      bodyHTML = `
+        <div class="ph-tracks">
+          <div class="ph-track" style="--tc:${ph.left.color}">
+            <div class="track-hdr">⬡ ${ph.left.label}</div>
+            <div class="track-nodes">${leftNodes}</div>
+          </div>
+          <div class="ph-track" style="--tc:${ph.right.color}">
+            <div class="track-hdr">⬡ ${ph.right.label}</div>
+            <div class="track-nodes">${rightNodes}</div>
+          </div>
+        </div>`;
+    } else {
+      const nodesHTML = ph.nodeIds.map(id => nodeHTML(id, ph.color)).join('');
+      bodyHTML = `<div class="ph-body">${nodesHTML}</div>`;
+    }
+
+    row.innerHTML = `
+      <div class="ph-tl">
+        <div class="ph-badge">${ph.id}</div>
+      </div>
+      <div class="ph-content">
+        <div class="ph-hdr">
+          <span class="ph-title">${ph.label}</span>
+          <span class="ph-sub">${ph.sub}</span>
+        </div>
+        ${bodyHTML}
+      </div>`;
+
+    container.appendChild(row);
+
+    // node click events
+    row.querySelectorAll('.node').forEach(el => {
+      el.addEventListener('click', e => {
+        if (e.target.closest('.n-done-btn')) toggleDone(el.dataset.id);
+        else openPanel(el.dataset.id);
+      });
+    });
+  });
+}
+
+/* ─────────────────────────────────────────
+   PANEL
+───────────────────────────────────────── */
+function openPanel(id) {
+  const n = NODES[id];
+  if (!n) return;
+
+  // find phase color
+  let color = '#00d4ff';
+  for (const ph of PHASES) {
+    if (ph.split) {
+      if (ph.left.nodeIds.includes(id))  { color = ph.left.color;  break; }
+      if (ph.right.nodeIds.includes(id)) { color = ph.right.color; break; }
+    } else if (ph.nodeIds.includes(id)) { color = ph.color; break; }
+  }
+
+  document.querySelectorAll('.node.active').forEach(el => el.classList.remove('active'));
+  const card = document.querySelector(`.node[data-id="${id}"]`);
+  if (card) { card.classList.add('active'); card.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+
+  activeId = id;
+  const stars = '★'.repeat(n.diff) + '☆'.repeat(5 - n.diff);
+  const chips = n.concepts.map(c => `<span class="chip">${c}</span>`).join('');
+  const links = n.links.map(l => `<a class="dlink" href="${l.p}" target="_blank">📄 ${l.l}</a>`).join('');
+
+  document.getElementById('panel').innerHTML = `
+    <div class="p-hdr">
+      <span class="p-icon">${n.icon}</span>
+      <div class="p-info">
+        <div class="p-title">${n.title}</div>
+        <span class="p-badge" style="background:color-mix(in srgb,${color} 12%,transparent);color:${color};border:1px solid color-mix(in srgb,${color} 25%,transparent)">
+          ${color === '#2563eb' ? 'BACKEND' : color === '#e11d48' ? 'FRONTEND' : PHASES.find(p => p.nodeIds?.includes(id) || (p.left?.nodeIds.includes(id)) || (p.right?.nodeIds.includes(id)))?.label || ''}
+        </span>
+      </div>
+      <button class="p-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="p-body">
+      <div class="p-sec">
+        <div class="p-sec-title">// DIFICULTAD &amp; TIEMPO</div>
+        <div class="p-meta">
+          <div>
+            <label>DIFFICULTY</label>
+            <div class="p-stars" style="color:${color}">${stars}</div>
+          </div>
+          <div>
+            <label>TIEMPO EST.</label>
+            <span class="p-time">⏱ ${n.time}</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-sec">
+        <div class="p-sec-title">// QUÉ ES?</div>
+        <p class="p-desc">${n.desc}</p>
+      </div>
+      <div class="p-sec">
+        <div class="p-sec-title">// POR QUÉ IMPORTA EN CODEMON TCG?</div>
+        <div class="p-why" style="--pc:${color}">${n.why}</div>
+      </div>
+      <div class="p-sec">
+        <div class="p-sec-title">// CONCEPTOS CLAVE</div>
+        <div class="chips">${chips}</div>
+      </div>
+      ${links ? `<div class="p-sec"><div class="p-sec-title">// DOCS DEL PROYECTO</div><div class="dlinks">${links}</div></div>` : ''}
+    </div>`;
+
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('main').classList.add('panel-open');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('main').classList.remove('panel-open');
+  document.querySelectorAll('.node.active').forEach(el => el.classList.remove('active'));
+  activeId = null;
+}
+
+/* ─────────────────────────────────────────
+   DONE
+───────────────────────────────────────── */
+function toggleDone(id) {
+  const done = getDone();
+  const i = done.indexOf(id);
+  i === -1 ? done.push(id) : done.splice(i, 1);
+  saveDone(done);
+  refreshDone();
+}
+
+function refreshDone() {
+  const done = getDone();
+  document.querySelectorAll('.node').forEach(el => {
+    el.classList.toggle('done', done.includes(el.dataset.id));
+  });
+  const doneBtns = document.querySelectorAll('.n-done-btn');
+  doneBtns.forEach(btn => {
+    const nodeEl = btn.closest('.node');
+    if (nodeEl) {
+      const isDone = done.includes(nodeEl.dataset.id);
+      if (isDone) {
+        btn.style.background = 'var(--nc)';
+        btn.style.borderColor = 'var(--nc)';
+        btn.style.color = '#000';
+        btn.style.opacity = '1';
+      } else {
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.style.opacity = '';
+      }
+    }
+  });
+  document.getElementById('progressEl').textContent = `${done.length} / ${TOTAL} completados`;
+}
+
+/* ─────────────────────────────────────────
+   EVENTS
+───────────────────────────────────────── */
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && activeId) closePanel(); });
+document.getElementById('main').addEventListener('click', e => {
+  if (activeId && !e.target.closest('.node') && !e.target.closest('.panel')) closePanel();
+});
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+buildPhases();
+refreshDone();
+</script>
+</body>
+</html>

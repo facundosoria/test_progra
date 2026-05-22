@@ -1,0 +1,1333 @@
+version: 1
+repo: Brf93/repo_tpi
+github_project:
+  owner: Brf93
+  name: Codemon TCG
+  number: null
+  status_field: Status
+  done_status: Done
+  in_progress_status: En progreso
+  blocked_status: Blocked
+
+rules:
+  hu_done_requires: all_required_steps_done
+  epic_done_requires: all_child_hu_done
+  issue_numbers_source: editable_fields
+  markdown_view: docs/08-desarrollo-con-ia/TRAZABILIDAD_PASOS_HU.md
+  step_state_source: docs/08-desarrollo-con-ia/ESTADO_PASOS.md
+  step_history_source: docs/08-desarrollo-con-ia/HISTORIAL_PASOS.md
+
+relations:
+  - paso_id: PASO_S00_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_01.md
+    hu_id: TT-10-01
+    hu_title: Definir CONTRATOS_API.md
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: ALL
+    required_for_hu_done: true
+    github_sync: false
+    contribution: contracts
+  - paso_id: PASO_S00_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_01.md
+    hu_id: TT-10-02
+    hu_title: Definir PROTOCOLO_WEBSOCKET.md
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: ALL
+    required_for_hu_done: true
+    github_sync: false
+    contribution: websocket-contracts
+  - paso_id: PASO_S00_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_01.md
+    hu_id: TT-10-03
+    hu_title: Definir MOCKS_FRONTEND.md
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: ALL
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend-mocks
+  - paso_id: PASO_S00_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_02.md
+    hu_id: TT-10-05
+    hu_title: docker-compose.yml con 10 servicios
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: local-tooling
+  - paso_id: PASO_S00_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_03.md
+    hu_id: TT-10-05
+    hu_title: docker-compose.yml con 10 servicios
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: docker-stack
+  - paso_id: PASO_S00_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_04.md
+    hu_id: TT-10-05
+    hu_title: docker-compose.yml con 10 servicios
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: api-project
+  - paso_id: PASO_S00_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_05.md
+    hu_id: TT-10-07
+    hu_title: Migraciones Flyway V1-V15
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: database-migrations
+  - paso_id: PASO_S00_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_06.md
+    hu_id: TT-10-03
+    hu_title: Definir MOCKS_FRONTEND.md
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend-project
+  - paso_id: PASO_S00_07
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_07.md
+    hu_id: TT-10-05
+    hu_title: docker-compose.yml con 10 servicios
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: infrastructure-smoke
+  - paso_id: PASO_S00_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S00_SMOKE.md
+    hu_id: null
+    hu_title: GATE 0 - infraestructura S0
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S0
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S01_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_01.md
+    hu_id: HU-01-01
+    hu_title: Registro con email y password
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S01_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_01.md
+    hu_id: HU-01-03
+    hu_title: Iniciar sesion
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S01_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_01.md
+    hu_id: HU-01-04
+    hu_title: Cerrar sesion
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S01_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_01.md
+    hu_id: HU-01-05
+    hu_title: Renovar sesion sin reingresar credenciales
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S01_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_02.md
+    hu_id: HU-01-01
+    hu_title: Registro con email y password
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S01_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_02.md
+    hu_id: HU-01-02
+    hu_title: Verificar cuenta via codigo email
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S8
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S01_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_02.md
+    hu_id: HU-01-03
+    hu_title: Iniciar sesion
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S01_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_02.md
+    hu_id: HU-01-05
+    hu_title: Renovar sesion sin reingresar credenciales
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S01_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S01_03.md
+    hu_id: HU-01-04
+    hu_title: Cerrar sesion
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S1
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: app-shell
+  - paso_id: PASO_S02_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_01.md
+    hu_id: HU-03-03
+    hu_title: Validar mazo TCG XY1
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend-validation
+  - paso_id: PASO_S02_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_02.md
+    hu_id: HU-02-01
+    hu_title: Ver catalogo paginado de cartas XY1
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_02.md
+    hu_id: HU-02-02
+    hu_title: Filtrar y buscar cartas
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_02.md
+    hu_id: HU-02-03
+    hu_title: Ver detalle de una carta
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_03.md
+    hu_id: HU-03-01
+    hu_title: Crear mazo nuevo
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_03.md
+    hu_id: HU-03-04
+    hu_title: Eliminar mazo
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_03.md
+    hu_id: HU-03-05
+    hu_title: Marcar mazo como favorito
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_03.md
+    hu_id: HU-03-06
+    hu_title: Copiar mazo starter
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: backend
+  - paso_id: PASO_S02_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_04.md
+    hu_id: HU-03-02
+    hu_title: Editar mazo con drag and drop
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S02_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_04.md
+    hu_id: HU-03-03
+    hu_title: Validar mazo TCG XY1
+    hu_issue_number: null
+    epic_id: EPIC-03
+    epic_title: Constructor de Mazos
+    epic_issue_number: null
+    sprint: S2
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend-validation
+  - paso_id: PASO_S02_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_05.md
+    hu_id: HU-02-01
+    hu_title: Ver catalogo paginado de cartas XY1
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S02_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_05.md
+    hu_id: HU-02-02
+    hu_title: Filtrar y buscar cartas
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S02_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_05.md
+    hu_id: HU-02-03
+    hu_title: Ver detalle de una carta
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S2
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: frontend
+  - paso_id: PASO_S02_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S02_SMOKE.md
+    hu_id: null
+    hu_title: GATE 1a/1b - auth cartas y mazos
+    hu_issue_number: null
+    epic_id: null
+    epic_title: Gate S1-S2
+    epic_issue_number: null
+    sprint: S2
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S03_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_01.md
+    hu_id: HU-04-01
+    hu_title: Iniciar partida con setup correcto
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: engine-foundation
+  - paso_id: PASO_S03_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_02.md
+    hu_id: HU-04-09
+    hu_title: Ganar la partida
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S5
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: win-conditions
+  - paso_id: PASO_S03_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_03.md
+    hu_id: HU-04-01
+    hu_title: Iniciar partida con setup correcto
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: setup
+  - paso_id: PASO_S03_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_04.md
+    hu_id: HU-04-02
+    hu_title: Robar carta al inicio de mi turno
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: draw-phase
+  - paso_id: PASO_S03_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_05.md
+    hu_id: HU-04-03
+    hu_title: Jugar Pokemon Basico al banco
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: main-phase
+  - paso_id: PASO_S03_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_05.md
+    hu_id: HU-04-04
+    hu_title: Adjuntar energia
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: main-phase
+  - paso_id: PASO_S03_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S03_05.md
+    hu_id: HU-04-05
+    hu_title: Evolucionar Pokemon
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S3
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: main-phase
+  - paso_id: PASO_S04_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S04_01.md
+    hu_id: HU-04-06
+    hu_title: Atacar al activo enemigo
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S4
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: damage-and-status
+  - paso_id: PASO_S04_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S04_02.md
+    hu_id: HU-04-06
+    hu_title: Atacar al activo enemigo
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S4
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: attack-pipeline
+  - paso_id: PASO_S04_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S04_03.md
+    hu_id: HU-04-06
+    hu_title: Atacar al activo enemigo
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S4
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: card-handlers
+  - paso_id: PASO_S04_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S04_03.md
+    hu_id: HU-04-07
+    hu_title: Retirar Pokemon activo
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S4
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: retreat
+  - paso_id: PASO_S04_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S04_03.md
+    hu_id: HU-04-08
+    hu_title: Tomar premios al hacer KO
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S4
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: prizes
+  - paso_id: PASO_S05_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S05_01.md
+    hu_id: HU-04-09
+    hu_title: Ganar la partida
+    hu_issue_number: null
+    epic_id: EPIC-04
+    epic_title: Motor de Juego
+    epic_issue_number: null
+    sprint: S5
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: end-phase
+  - paso_id: PASO_S05_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S05_02.md
+    hu_id: HU-08-01
+    hu_title: Bot EASY
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S5
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: easy-bot
+  - paso_id: PASO_S05_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S05_03.md
+    hu_id: HU-05-05
+    hu_title: Recibir eventos de partida en tiempo real
+    hu_issue_number: null
+    epic_id: EPIC-05
+    epic_title: Multijugador y Matchmaking
+    epic_issue_number: null
+    sprint: S7
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: websocket-events
+  - paso_id: PASO_S05_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S05_04.md
+    hu_id: HU-06-01
+    hu_title: Ver mi mano activo banco premios y descarte
+    hu_issue_number: null
+    epic_id: EPIC-06
+    epic_title: Tablero y Experiencia de Juego
+    epic_issue_number: null
+    sprint: S5
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: board-ui
+  - paso_id: PASO_S05_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S05_SMOKE.md
+    hu_id: null
+    hu_title: GATE 2 - motor y PvE
+    hu_issue_number: null
+    epic_id: null
+    epic_title: Gate S3-S5
+    epic_issue_number: null
+    sprint: S5
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S06_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S06_01.md
+    hu_id: HU-06-04
+    hu_title: Lobby con seleccion de modo
+    hu_issue_number: null
+    epic_id: EPIC-06
+    epic_title: Tablero y Experiencia de Juego
+    epic_issue_number: null
+    sprint: S6
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: lobby-ui
+  - paso_id: PASO_S07_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S07_01.md
+    hu_id: HU-05-01
+    hu_title: Crear sala privada con codigo
+    hu_issue_number: null
+    epic_id: EPIC-05
+    epic_title: Multijugador y Matchmaking
+    epic_issue_number: null
+    sprint: S7
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: private-room
+  - paso_id: PASO_S07_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S07_01.md
+    hu_id: HU-05-02
+    hu_title: Unirme a sala con codigo
+    hu_issue_number: null
+    epic_id: EPIC-05
+    epic_title: Multijugador y Matchmaking
+    epic_issue_number: null
+    sprint: S7
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: private-room
+  - paso_id: PASO_S07_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S07_02.md
+    hu_id: HU-05-03
+    hu_title: Entrar a cola ranked
+    hu_issue_number: null
+    epic_id: EPIC-05
+    epic_title: Multijugador y Matchmaking
+    epic_issue_number: null
+    sprint: S7
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: matchmaking
+  - paso_id: PASO_S07_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S07_02.md
+    hu_id: HU-05-04
+    hu_title: Cancelar mi entrada en la cola
+    hu_issue_number: null
+    epic_id: EPIC-05
+    epic_title: Multijugador y Matchmaking
+    epic_issue_number: null
+    sprint: S7
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: matchmaking
+  - paso_id: PASO_S07_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S07_SMOKE.md
+    hu_id: null
+    hu_title: GATE 3/4 - salas privadas y matchmaking
+    hu_issue_number: null
+    epic_id: null
+    epic_title: Gate S7
+    epic_issue_number: null
+    sprint: S7
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S08_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_01.md
+    hu_id: HU-02-04
+    hu_title: Ver mi coleccion personal
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: collection-backend
+  - paso_id: PASO_S08_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_01.md
+    hu_id: HU-07-03
+    hu_title: Comprar sobre booster pack
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: booster-backend
+  - paso_id: PASO_S08_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_01.md
+    hu_id: HU-07-04
+    hu_title: Abrir sobre con animacion
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: booster-backend
+  - paso_id: PASO_S08_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_01.md
+    hu_id: HU-07-05
+    hu_title: Cooldown 24h tras abrir sobre
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: booster-backend
+  - paso_id: PASO_S08_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_02.md
+    hu_id: HU-02-05
+    hu_title: Ver estadisticas de mi coleccion
+    hu_issue_number: null
+    epic_id: EPIC-02
+    epic_title: Catalogo y Coleccion de Cartas
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: collection-stats
+  - paso_id: PASO_S08_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_02.md
+    hu_id: HU-09-05
+    hu_title: Leaderboard global
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: leaderboard-backend
+  - paso_id: PASO_S08_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_02.md
+    hu_id: HU-09-06
+    hu_title: Mi posicion en ranking
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: ranking-backend
+  - paso_id: PASO_S08_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_03.md
+    hu_id: HU-01-02
+    hu_title: Verificar cuenta via codigo email
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: email-verification-backend
+  - paso_id: PASO_S08_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_03.md
+    hu_id: HU-01-06
+    hu_title: Segundo factor por email
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: two-factor-backend
+  - paso_id: PASO_S08_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_04.md
+    hu_id: HU-07-01
+    hu_title: Ver mi balance de coins
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: wallet-backend
+  - paso_id: PASO_S08_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_04.md
+    hu_id: HU-07-02
+    hu_title: Comprar coins con Mercado Pago
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: payments
+  - paso_id: PASO_S08_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_04.md
+    hu_id: HU-07-06
+    hu_title: Historial de pagos
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S10
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: payments
+  - paso_id: PASO_S08_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_05.md
+    hu_id: TT-10-12
+    hu_title: Metricas custom codemon_*
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S8
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: monitoring
+  - paso_id: PASO_S08_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_06.md
+    hu_id: HU-07-01
+    hu_title: Ver mi balance de coins
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: shop-ui
+  - paso_id: PASO_S08_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_06.md
+    hu_id: HU-07-03
+    hu_title: Comprar sobre booster pack
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: shop-ui
+  - paso_id: PASO_S08_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_06.md
+    hu_id: HU-07-04
+    hu_title: Abrir sobre con animacion
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: shop-ui
+  - paso_id: PASO_S08_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_06.md
+    hu_id: HU-07-05
+    hu_title: Cooldown 24h tras abrir sobre
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: shop-ui
+  - paso_id: PASO_S08_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S08_SMOKE.md
+    hu_id: null
+    hu_title: GATE 5 - tienda pagos sobres 2FA metricas
+    hu_issue_number: null
+    epic_id: null
+    epic_title: Gate S8
+    epic_issue_number: null
+    sprint: S8
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S09_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_01.md
+    hu_id: HU-09-07
+    hu_title: Progresion por ligas
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: leagues
+  - paso_id: PASO_S09_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_02.md
+    hu_id: HU-09-03
+    hu_title: Solicitar amistad
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: friends-backend
+  - paso_id: PASO_S09_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_02.md
+    hu_id: HU-09-04
+    hu_title: Presencia en tiempo real
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: presence-backend
+  - paso_id: PASO_S09_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_03.md
+    hu_id: HU-09-08
+    hu_title: Leer noticias
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: news-backend
+  - paso_id: PASO_S09_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_04.md
+    hu_id: HU-09-05
+    hu_title: Leaderboard global
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: leaderboard-ui
+  - paso_id: PASO_S09_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_04.md
+    hu_id: HU-09-06
+    hu_title: Mi posicion en ranking
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: ranking-ui
+  - paso_id: PASO_S09_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_04.md
+    hu_id: HU-09-08
+    hu_title: Leer noticias
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: news-ui
+  - paso_id: PASO_S09_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_05.md
+    hu_id: HU-09-03
+    hu_title: Solicitar amistad
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: friends-ui
+  - paso_id: PASO_S09_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S09_05.md
+    hu_id: HU-09-04
+    hu_title: Presencia en tiempo real
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S9
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: presence-ui
+  - paso_id: PASO_S10_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S10_01.md
+    hu_id: HU-01-07
+    hu_title: Login con Google y GitHub OAuth2
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S10
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: oauth-backend
+  - paso_id: PASO_S10_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S10_02.md
+    hu_id: HU-01-07
+    hu_title: Login con Google y GitHub OAuth2
+    hu_issue_number: null
+    epic_id: EPIC-01
+    epic_title: Autenticacion y Seguridad
+    epic_issue_number: null
+    sprint: S10
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: oauth-frontend
+  - paso_id: PASO_S10_SMOKE
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S10_SMOKE.md
+    hu_id: null
+    hu_title: GATE 6/7 - social OAuth perfil
+    hu_issue_number: null
+    epic_id: null
+    epic_title: Gate S9-S10
+    epic_issue_number: null
+    sprint: S10
+    team: ALL
+    required_for_hu_done: false
+    github_sync: false
+    contribution: smoke-gate
+  - paso_id: PASO_S11_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_01.md
+    hu_id: HU-08-02
+    hu_title: Bot MEDIUM greedy
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: medium-bot
+  - paso_id: PASO_S11_01
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_01.md
+    hu_id: HU-08-03
+    hu_title: Bot HARD minimax
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: hard-bot
+  - paso_id: PASO_S11_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_02.md
+    hu_id: HU-06-05
+    hu_title: Chat de partida
+    hu_issue_number: null
+    epic_id: EPIC-06
+    epic_title: Tablero y Experiencia de Juego
+    epic_issue_number: null
+    sprint: S6
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: chat-backend
+  - paso_id: PASO_S11_02
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_02.md
+    hu_id: HU-08-05
+    hu_title: Mensajes con personalidad durante partida
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: bot-chat-backend
+  - paso_id: PASO_S11_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_03.md
+    hu_id: HU-08-04
+    hu_title: Elegir personalidad del bot
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: bot-personality
+  - paso_id: PASO_S11_03
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_03.md
+    hu_id: HU-08-05
+    hu_title: Mensajes con personalidad durante partida
+    hu_issue_number: null
+    epic_id: EPIC-08
+    epic_title: Bot e Inteligencia Artificial
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: bot-personality
+  - paso_id: PASO_S11_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_04.md
+    hu_id: HU-07-01
+    hu_title: Ver mi balance de coins
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S8
+    team: C+B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: wallet-endpoint-ui
+  - paso_id: PASO_S11_04
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_04.md
+    hu_id: HU-07-06
+    hu_title: Historial de pagos
+    hu_issue_number: null
+    epic_id: EPIC-07
+    epic_title: Tienda y Monetizacion
+    epic_issue_number: null
+    sprint: S10
+    team: C+B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: wallet-history
+  - paso_id: PASO_S11_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_05.md
+    hu_id: HU-09-01
+    hu_title: Perfil consolidado
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S10
+    team: C+B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: profile
+  - paso_id: PASO_S11_05
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_05.md
+    hu_id: HU-09-02
+    hu_title: Perfil publico de otro jugador
+    hu_issue_number: null
+    epic_id: EPIC-09
+    epic_title: Social y Comunidad
+    epic_issue_number: null
+    sprint: S10
+    team: C+B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: public-profile
+  - paso_id: PASO_S11_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_06.md
+    hu_id: TT-11-04
+    hu_title: Suite Playwright E2E
+    hu_issue_number: null
+    epic_id: EPIC-11
+    epic_title: Calidad y Testing
+    epic_issue_number: null
+    sprint: S11
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: e2e-tests
+  - paso_id: PASO_S11_06
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_06.md
+    hu_id: TT-11-09
+    hu_title: Test de carga 50 partidas WebSocket
+    hu_issue_number: null
+    epic_id: EPIC-11
+    epic_title: Calidad y Testing
+    epic_issue_number: null
+    sprint: S11
+    team: A
+    required_for_hu_done: true
+    github_sync: false
+    contribution: load-tests
+  - paso_id: PASO_S11_07
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_07.md
+    hu_id: HU-06-06
+    hu_title: Responsive mobile tablet desktop
+    hu_issue_number: null
+    epic_id: EPIC-06
+    epic_title: Tablero y Experiencia de Juego
+    epic_issue_number: null
+    sprint: S11
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: responsive-ui
+  - paso_id: PASO_S11_07
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_07.md
+    hu_id: TT-11-05
+    hu_title: Lighthouse audit mobile
+    hu_issue_number: null
+    epic_id: EPIC-11
+    epic_title: Calidad y Testing
+    epic_issue_number: null
+    sprint: S11
+    team: B
+    required_for_hu_done: true
+    github_sync: false
+    contribution: lighthouse
+  - paso_id: PASO_S11_08
+    paso_file: docs/08-desarrollo-con-ia/pasos/PASO_S11_08.md
+    hu_id: TT-10-21
+    hu_title: HTTPS productivo con Nginx TLS
+    hu_issue_number: null
+    epic_id: EPIC-10
+    epic_title: Infraestructura y DevOps
+    epic_issue_number: null
+    sprint: S11
+    team: C
+    required_for_hu_done: true
+    github_sync: false
+    contribution: production-https

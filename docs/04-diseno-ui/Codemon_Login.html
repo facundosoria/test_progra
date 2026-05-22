@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codemon — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: #0f0f1a;
+      --gold: #c9a227;
+      --gold-light: #e8c547;
+      --gold-dim: #8a6e1a;
+      --text-primary: #f0e8d0;
+      --text-secondary: #8a8090;
+      --text-dim: #4a4456;
+      --border: rgba(201,162,39,0.2);
+      --border-hover: rgba(201,162,39,0.5);
+      --error: #f43f5e;
+    }
+
+    html, body { height: 100%; background: var(--bg-deep); font-family: 'Nunito', sans-serif; color: var(--text-primary); overflow: hidden; }
+    #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+
+    .bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+    #bgCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .bg-noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); opacity: 0.4; }
+    .bg-radial { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 30%, rgba(14,165,233,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, rgba(201,162,39,0.06) 0%, transparent 50%); }
+    .bg-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(201,162,39,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,162,39,0.04) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%); }
+
+    .card-float { position: absolute; border-radius: 10px; border: 1px solid rgba(201,162,39,0.12); background: linear-gradient(135deg, rgba(201,162,39,0.03), rgba(124,58,237,0.03)); animation: floatCard var(--dur, 12s) ease-in-out infinite var(--delay, 0s); }
+    @keyframes floatCard { 0%, 100% { transform: translateY(0) rotate(var(--rot, 12deg)); opacity: var(--op, 0.4); } 50% { transform: translateY(-20px) rotate(calc(var(--rot, 12deg) + 3deg)); opacity: calc(var(--op, 0.4) + 0.1); } }
+
+    .pokeball-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, transparent 40%, rgba(201,162,39,0.03) 70%, transparent 100%); border: 1px solid rgba(201,162,39,0.06); animation: pulseOrb 4s ease-in-out infinite; }
+    @keyframes pulseOrb { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; } }
+
+    @property --holo-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @keyframes holoSpin { from { --holo-angle: 0deg; } to { --holo-angle: 360deg; } }
+    @keyframes cardReveal { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes successPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shakeCard { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+
+    .login-card { position: relative; z-index: 10; width: 440px; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 0 0 1px rgba(201,162,39,0.05), 0 40px 80px rgba(0,0,0,0.6), 0 0 40px rgba(201,162,39,0.04), inset 0 1px 0 rgba(201,162,39,0.1); padding: 48px 44px 40px; animation: cardReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .login-card::before { content: ''; position: absolute; inset: -1px; border-radius: 25px; background: conic-gradient(from var(--holo-angle, 0deg), rgba(124,58,237,0) 0%, rgba(124,58,237,0.4) 10%, rgba(14,165,233,0.4) 20%, rgba(16,185,129,0.3) 30%, rgba(201,162,39,0.5) 40%, rgba(244,63,94,0.3) 50%, rgba(124,58,237,0.4) 60%, rgba(14,165,233,0) 70%, rgba(201,162,39,0) 100%); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; padding: 1px; animation: holoSpin 8s linear infinite; opacity: 0.5; }
+
+    .logo-area { text-align: center; margin-bottom: 36px; animation: fadeUp 0.6s 0.2s cubic-bezier(0.22,1,0.36,1) both; }
+    .logo-emblem { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; margin-bottom: 16px; }
+    .logo-emblem svg { width: 64px; height: 64px; filter: drop-shadow(0 0 12px rgba(201,162,39,0.4)); }
+    .logo-title { font-family: 'Cinzel Decorative', serif; font-size: 28px; font-weight: 900; letter-spacing: 0.04em; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 2px 8px rgba(201,162,39,0.3)); line-height: 1; margin-bottom: 6px; }
+    .logo-subtitle { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; color: var(--text-secondary); text-transform: uppercase; }
+
+    .tab-row { display: flex; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 3px; margin-bottom: 28px; animation: fadeUp 0.6s 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+    .tab-btn { flex: 1; padding: 9px 0; border: none; background: transparent; font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: var(--text-dim); cursor: pointer; border-radius: 8px; transition: all 0.25s ease; }
+    .tab-btn.active { background: linear-gradient(135deg, rgba(201,162,39,0.15), rgba(201,162,39,0.08)); color: var(--gold-light); box-shadow: 0 1px 0 rgba(201,162,39,0.2), inset 0 1px 0 rgba(201,162,39,0.1); }
+
+    .form-fields { display: flex; flex-direction: column; gap: 16px; animation: fadeUp 0.6s 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--text-secondary); text-transform: uppercase; }
+    .field-wrapper { position: relative; }
+    .field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim); transition: color 0.2s ease; pointer-events: none; display: flex; align-items: center; }
+    .field-wrapper:focus-within .field-icon { color: var(--gold-dim); }
+    .field-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px 13px 42px; font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text-primary); outline: none; transition: all 0.25s ease; caret-color: var(--gold); }
+    .field-input::placeholder { color: var(--text-dim); }
+    .field-input:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.04); }
+    .field-input:focus { border-color: var(--gold-dim); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 3px rgba(201,162,39,0.1); }
+    .field-input.error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(244,63,94,0.1); }
+    .eye-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; }
+    .eye-btn:hover { color: var(--gold); }
+    .error-msg { font-size: 11px; color: var(--error); }
+
+    .options-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+    .remember-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); user-select: none; }
+    .remember-box { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 4px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .remember-box.checked { background: linear-gradient(135deg, rgba(201,162,39,0.2), rgba(201,162,39,0.1)); border-color: var(--gold-dim); }
+    .forgot-link { font-size: 12px; color: var(--gold-dim); text-decoration: none; font-family: 'Cinzel', serif; letter-spacing: 0.05em; transition: color 0.2s; }
+    .forgot-link:hover { color: var(--gold-light); }
+
+    .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; background: linear-gradient(135deg, #b8891f 0%, #c9a227 40%, #e8c547 70%, #c9a227 100%); background-size: 200% auto; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; letter-spacing: 0.15em; color: #0a0a0f; cursor: pointer; margin-top: 8px; position: relative; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(201,162,39,0.3), inset 0 1px 0 rgba(255,255,255,0.1); text-transform: uppercase; animation: fadeUp 0.6s 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+    .submit-btn:hover:not(:disabled) { background-position: right center; box-shadow: 0 6px 28px rgba(201,162,39,0.45), inset 0 1px 0 rgba(255,255,255,0.15); transform: translateY(-1px); }
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%); transform: translateX(-100%); transition: transform 0.5s ease; }
+    .submit-btn:hover:not(:disabled)::after { transform: translateX(100%); }
+    .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(10,10,15,0.3); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; }
+
+    .success-overlay { position: absolute; inset: 0; background: var(--bg-card); border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; animation: fadeIn 0.4s ease both; z-index: 20; }
+    .success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, rgba(201,162,39,0.15), rgba(16,185,129,0.1)); border: 2px solid var(--gold-dim); display: flex; align-items: center; justify-content: center; animation: successPop 0.5s 0.1s cubic-bezier(0.22,1,0.36,1) both; }
+    .success-title { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--gold-light); }
+    .success-sub { font-size: 13px; color: var(--text-secondary); }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 16px; animation: fadeUp 0.6s 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+    .divider-text { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--text-dim); text-transform: uppercase; }
+
+    .social-row { display: flex; gap: 10px; animation: fadeUp 0.6s 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+    .social-btn { flex: 1; padding: 11px 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.25s ease; }
+    .social-btn:hover { border-color: var(--border-hover); color: var(--text-primary); background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+
+    .card-footer { margin-top: 24px; text-align: center; font-size: 12px; color: var(--text-secondary); animation: fadeUp 0.6s 0.65s cubic-bezier(0.22,1,0.36,1) both; }
+    .card-footer a { color: var(--gold); text-decoration: none; font-weight: 700; transition: color 0.2s; }
+    .card-footer a:hover { color: var(--gold-light); }
+
+    .strength-bar { display: flex; gap: 3px; margin-top: 6px; align-items: center; }
+    .strength-seg { height: 3px; flex: 1; border-radius: 2px; background: rgba(255,255,255,0.08); transition: background 0.3s ease; }
+
+    /* Tweaks panel styles */
+    .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;background:rgba(250,249,247,.78);color:#29261b;-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+    .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none}
+    .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+    .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+    .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+    .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overflow-x:hidden;min-height:0}
+    .twk-row{display:flex;flex-direction:column;gap:5px}
+    .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+    .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
+    .twk-lbl>span:first-child{font-weight:500}
+    .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.45);padding:10px 0 0}
+    .twk-sect:first-child{padding-top:0}
+    .twk-row-h .twk-lbl>span:first-child{font-weight:500}
+    .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.06);user-select:none}
+    .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+    .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2}
+    .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0;flex-shrink:0}
+    .twk-toggle[data-on="1"]{background:#34c759}
+    .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+    .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+    .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;background:transparent;flex-shrink:0}
+    .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+    .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  </style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <canvas id="bgCanvas"></canvas>
+  <div class="bg-noise"></div>
+  <div class="bg-radial"></div>
+  <div class="bg-grid"></div>
+  <div class="pokeball-orb"></div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Pokemon silhouettes ──────────────────────────────────────────────────
+  const SHAPES = [
+    // Pikachu
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.ellipse(0,8,12,14,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-8,-4); ctx.lineTo(-14,-18); ctx.lineTo(-2,-8); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(8,-4); ctx.lineTo(14,-18); ctx.lineTo(2,-8); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-4,10,10,0,0,Math.PI*2); ctx.fill();
+    },
+    // Gengar
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.moveTo(0,-16); ctx.bezierCurveTo(10,-16,18,-8,18,0); ctx.bezierCurveTo(18,8,12,14,6,14);
+      ctx.lineTo(10,20); ctx.lineTo(3,14); ctx.lineTo(0,20); ctx.lineTo(-3,14); ctx.lineTo(-10,20); ctx.lineTo(-6,14);
+      ctx.bezierCurveTo(-12,14,-18,8,-18,0); ctx.bezierCurveTo(-18,-8,-10,-16,0,-16); ctx.closePath(); ctx.fill();
+    },
+    // Eevee
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.ellipse(18,-2,10,7,0.4,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,6,11,13,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-6,9,9,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-5,-12); ctx.lineTo(-10,-22); ctx.lineTo(0,-14); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(5,-12); ctx.lineTo(10,-22); ctx.lineTo(0,-14); ctx.closePath(); ctx.fill();
+    },
+    // Snorlax
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.ellipse(0,6,18,20,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-12,11,10,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-10,-20,4,5,-0.3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10,-20,4,5,0.3,0,Math.PI*2); ctx.fill();
+    },
+    // Mewtwo
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.moveTo(8,14); ctx.bezierCurveTo(20,10,22,-2,14,-8); ctx.bezierCurveTo(12,-10,14,-14,16,-14);
+      ctx.lineWidth=3; ctx.strokeStyle=ctx.fillStyle; ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0,6,9,14,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-8,9,9,0,0,Math.PI*2); ctx.fill();
+    },
+    // Pokeball
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.lineWidth=2; ctx.strokeStyle=ctx.fillStyle;
+      ctx.beginPath(); ctx.arc(0,0,16,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-16,0); ctx.lineTo(16,0); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.stroke();
+    },
+    // Ditto
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.moveTo(0,-14); ctx.bezierCurveTo(8,-14,16,-6,14,4); ctx.bezierCurveTo(12,12,6,16,0,16);
+      ctx.bezierCurveTo(-6,16,-14,10,-14,2); ctx.bezierCurveTo(-14,-8,-8,-14,0,-14); ctx.closePath(); ctx.fill();
+    },
+    // Charizard-like: winged dragon
+    function(ctx, s) {
+      ctx.scale(s,s);
+      // body
+      ctx.beginPath(); ctx.ellipse(0,4,10,14,0,0,Math.PI*2); ctx.fill();
+      // head
+      ctx.beginPath(); ctx.ellipse(0,-12,8,8,0,0,Math.PI*2); ctx.fill();
+      // left wing
+      ctx.beginPath(); ctx.moveTo(-6,0); ctx.bezierCurveTo(-22,-6,-26,-16,-18,-20); ctx.bezierCurveTo(-14,-22,-8,-14,-6,-6); ctx.closePath(); ctx.fill();
+      // right wing
+      ctx.beginPath(); ctx.moveTo(6,0); ctx.bezierCurveTo(22,-6,26,-16,18,-20); ctx.bezierCurveTo(14,-22,8,-14,6,-6); ctx.closePath(); ctx.fill();
+      // tail
+      ctx.beginPath(); ctx.moveTo(4,16); ctx.bezierCurveTo(10,22,14,18,12,14); ctx.lineWidth=3; ctx.strokeStyle=ctx.fillStyle; ctx.stroke();
+    },
+    // Bulbasaur-like: round with bulb
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.ellipse(0,6,14,12,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-6,9,9,0,0,Math.PI*2); ctx.fill();
+      // bulb
+      ctx.beginPath(); ctx.ellipse(0,0,7,9,-0.2,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-4,-14); ctx.lineTo(-8,-22); ctx.lineTo(-2,-12); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(4,-14); ctx.lineTo(8,-22); ctx.lineTo(2,-12); ctx.closePath(); ctx.fill();
+    },
+    // Lucario-like: bipedal with spikes
+    function(ctx, s) {
+      ctx.scale(s,s);
+      ctx.beginPath(); ctx.ellipse(0,2,8,12,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0,-12,7,7,0,0,Math.PI*2); ctx.fill();
+      // ears
+      ctx.beginPath(); ctx.moveTo(-4,-17); ctx.lineTo(-8,-26); ctx.lineTo(-1,-18); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(4,-17); ctx.lineTo(8,-26); ctx.lineTo(1,-18); ctx.closePath(); ctx.fill();
+      // chest spike
+      ctx.beginPath(); ctx.moveTo(-4,0); ctx.lineTo(0,-6); ctx.lineTo(4,0); ctx.closePath(); ctx.fill();
+      // legs
+      ctx.beginPath(); ctx.ellipse(-5,16,3,6,0.2,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5,16,3,6,-0.2,0,Math.PI*2); ctx.fill();
+    },
+  ];
+
+  // Energy type colors
+  const TYPE_COLORS = [
+    [201,162,39],  // gold
+    [244,63,94],   // fire
+    [14,165,233],  // water
+    [124,58,237],  // psychic
+    [16,185,129],  // grass
+    [234,179,8],   // lightning
+    [251,146,60],  // fighting/orange
+    [99,102,241],  // dragon/indigo
+  ];
+
+  // ── TCG Card silhouettes ─────────────────────────────────────────────────
+  const CARD_COUNT = 14;
+  const cards = Array.from({length: CARD_COUNT}, (_, i) => createCard(true));
+
+  function createCard(initial) {
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    const side = Math.random() > 0.5;
+    const W = window.innerWidth, H = window.innerHeight;
+    const w = Math.random() * 40 + 28, h = w * 1.4;
+    return {
+      x: initial ? Math.random() * W : (side ? -w : W + w),
+      y: initial ? Math.random() * H : Math.random() * H,
+      w, h,
+      vx: initial ? (Math.random() - 0.5) * 0.2 : (side ? 1 : -1) * (Math.random() * 0.3 + 0.05),
+      vy: (Math.random() - 0.5) * 0.15,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.004,
+      color,
+      alpha: Math.random() * 0.15 + 0.04,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.015 + 0.005,
+      holoOffset: Math.random() * Math.PI * 2,
+    };
+  }
+
+  // ── Pokemon silhouettes ──────────────────────────────────────────────────
+  const SILHOUETTE_COUNT = 16;
+  const silhouettes = Array.from({length: SILHOUETTE_COUNT}, (_, i) => createSilhouette(true, i));
+
+  function createSilhouette(initial, idx) {
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    const side = Math.random() > 0.5;
+    const W = window.innerWidth, H = window.innerHeight;
+    return {
+      x: initial ? Math.random() * W : (side ? -80 : W + 80),
+      y: initial ? Math.random() * H : Math.random() * H,
+      vx: initial ? (Math.random() - 0.5) * 0.18 : (side ? 1 : -1) * (Math.random() * 0.2 + 0.05),
+      vy: (Math.random() - 0.5) * 0.12,
+      scale: Math.random() * 1.6 + 0.5,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.004,
+      shape: Math.floor(Math.random() * SHAPES.length),
+      color,
+      alpha: Math.random() * 0.18 + 0.05,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.02 + 0.008,
+    };
+  }
+
+  // ── Particles ────────────────────────────────────────────────────────────
+  const PARTICLE_COUNT = 120;
+  const particles = Array.from({length: PARTICLE_COUNT}, () => createParticle(true));
+
+  function createParticle(initial) {
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    const W = window.innerWidth, H = window.innerHeight;
+    return {
+      x: initial ? Math.random() * W : Math.random() * W,
+      y: initial ? Math.random() * H : H + 10,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: -Math.random() * 0.8 - 0.1,
+      r: Math.random() * 3 + 0.5,
+      color,
+      alpha: Math.random() * 0.5 + 0.15,
+      life: initial ? Math.random() : 0,
+      maxLife: Math.random() * 0.5 + 0.5,
+      twinkle: Math.random() * Math.PI * 2,
+      twinkleSpeed: Math.random() * 0.05 + 0.01,
+      trail: Math.random() > 0.7,
+      trailLen: Math.floor(Math.random() * 8 + 4),
+      history: [],
+    };
+  }
+
+  // ── Energy orbs ──────────────────────────────────────────────────────────
+  const ORB_COUNT = 14;
+  const orbs = Array.from({length: ORB_COUNT}, () => createOrb(true));
+
+  function createOrb(initial) {
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    const W = window.innerWidth, H = window.innerHeight;
+    return {
+      x: initial ? Math.random() * W : (Math.random() > 0.5 ? -40 : W + 40),
+      y: initial ? Math.random() * H : Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 28 + 10,
+      color,
+      alpha: Math.random() * 0.1 + 0.03,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.018 + 0.005,
+    };
+  }
+
+  // ── Energy beams (connecting lines between orbs) ─────────────────────────
+  const BEAM_COUNT = 6;
+  const beams = Array.from({length: BEAM_COUNT}, () => createBeam());
+
+  function createBeam() {
+    const W = window.innerWidth, H = window.innerHeight;
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    return {
+      x1: Math.random() * W, y1: Math.random() * H,
+      x2: Math.random() * W, y2: Math.random() * H,
+      vx1: (Math.random() - 0.5) * 0.4, vy1: (Math.random() - 0.5) * 0.4,
+      vx2: (Math.random() - 0.5) * 0.4, vy2: (Math.random() - 0.5) * 0.4,
+      color, alpha: Math.random() * 0.08 + 0.02,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.03 + 0.01,
+      life: Math.random(),
+      maxLife: Math.random() * 0.6 + 0.4,
+    };
+  }
+
+  // ── Shooting stars ────────────────────────────────────────────────────────
+  const stars = Array.from({length: 5}, () => createStar(true));
+  function createStar(initial) {
+    const W = window.innerWidth, H = window.innerHeight;
+    const color = TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)];
+    return {
+      x: initial ? Math.random() * W : -20,
+      y: initial ? Math.random() * H * 0.5 : Math.random() * H * 0.4,
+      vx: Math.random() * 4 + 2,
+      vy: Math.random() * 1.5 + 0.5,
+      len: Math.random() * 60 + 40,
+      color, alpha: 0,
+      life: initial ? Math.random() : 0,
+      maxLife: Math.random() * 0.3 + 0.1,
+      delay: initial ? Math.random() * 1 : Math.random() * 0.8 + 0.2,
+    };
+  }
+
+  // ── Static star field ────────────────────────────────────────────────────
+  const STAR_COUNT = 80;
+  const starField = Array.from({length: STAR_COUNT}, () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.2 + 0.2,
+    alpha: Math.random() * 0.3 + 0.05,
+    twinkle: Math.random() * Math.PI * 2,
+    twinkleSpeed: Math.random() * 0.02 + 0.005,
+    color: TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)],
+  }));
+
+  let frame = 0;
+
+  function draw() {
+    frame++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
+
+    // ── Star field ──
+    starField.forEach(s => {
+      s.twinkle += s.twinkleSpeed;
+      const a = s.alpha * (0.5 + 0.5 * Math.sin(s.twinkle));
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${a})`;
+      ctx.fill();
+    });
+
+    // ── Energy beams ──
+    beams.forEach((b, i) => {
+      b.life += 0.004;
+      b.pulse += b.pulseSpeed;
+      b.x1 += b.vx1; b.y1 += b.vy1;
+      b.x2 += b.vx2; b.y2 += b.vy2;
+      if (b.x1 < 0 || b.x1 > W) b.vx1 *= -1;
+      if (b.y1 < 0 || b.y1 > H) b.vy1 *= -1;
+      if (b.x2 < 0 || b.x2 > W) b.vx2 *= -1;
+      if (b.y2 < 0 || b.y2 > H) b.vy2 *= -1;
+      if (b.life > b.maxLife) { beams[i] = createBeam(); return; }
+      const lifeRatio = b.life / b.maxLife;
+      const fade = lifeRatio < 0.15 ? lifeRatio / 0.15 : lifeRatio > 0.75 ? (1 - lifeRatio) / 0.25 : 1;
+      const pa = b.alpha * fade * (0.6 + 0.4 * Math.sin(b.pulse));
+      const grad = ctx.createLinearGradient(b.x1, b.y1, b.x2, b.y2);
+      grad.addColorStop(0, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},0)`);
+      grad.addColorStop(0.4, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},${pa})`);
+      grad.addColorStop(0.6, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},${pa})`);
+      grad.addColorStop(1, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},0)`);
+      ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2);
+      ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+      // dots at endpoints
+      ctx.beginPath(); ctx.arc(b.x1, b.y1, 2.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${b.color[0]},${b.color[1]},${b.color[2]},${pa * 1.5})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(b.x2, b.y2, 2.5, 0, Math.PI*2); ctx.fill();
+    });
+
+    // ── Energy orbs ──
+    orbs.forEach((o, i) => {
+      o.pulse += o.pulseSpeed;
+      o.x += o.vx; o.y += o.vy;
+      if (o.x < -80 || o.x > W+80 || o.y < -80 || o.y > H+80) { orbs[i] = createOrb(false); return; }
+      const pa = o.alpha * (0.7 + 0.3 * Math.sin(o.pulse));
+      const grad = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+      grad.addColorStop(0, `rgba(${o.color[0]},${o.color[1]},${o.color[2]},${pa * 2})`);
+      grad.addColorStop(0.4, `rgba(${o.color[0]},${o.color[1]},${o.color[2]},${pa})`);
+      grad.addColorStop(1, `rgba(${o.color[0]},${o.color[1]},${o.color[2]},0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill();
+    });
+
+    // ── TCG Cards ──
+    cards.forEach((c, i) => {
+      c.pulse += c.pulseSpeed;
+      c.rot += c.rotSpeed;
+      c.x += c.vx; c.y += c.vy;
+      if (c.x < -100 || c.x > W+100 || c.y < -100 || c.y > H+100) { cards[i] = createCard(false); return; }
+      const pa = c.alpha * (0.8 + 0.2 * Math.sin(c.pulse));
+      ctx.save();
+      ctx.globalAlpha = pa;
+      ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+      const hw = c.w/2, hh = c.h/2;
+      // card body
+      ctx.beginPath();
+      ctx.roundRect(-hw, -hh, c.w, c.h, 3);
+      ctx.fillStyle = `rgba(${c.color[0]},${c.color[1]},${c.color[2]},0.06)`;
+      ctx.fill();
+      // card border
+      ctx.strokeStyle = `rgba(${c.color[0]},${c.color[1]},${c.color[2]},0.4)`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+      // inner lines (card detail)
+      ctx.strokeStyle = `rgba(${c.color[0]},${c.color[1]},${c.color[2]},0.15)`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.roundRect(-hw+3, -hh+3, c.w-6, c.h-6, 2); ctx.stroke();
+      // holographic shimmer line
+      const shimX = -hw + ((frame * 0.5 + c.holoOffset * 50) % (c.w + 20)) - 10;
+      const shimGrad = ctx.createLinearGradient(shimX, -hh, shimX + 8, hh);
+      shimGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      shimGrad.addColorStop(0.5, `rgba(${c.color[0]},${c.color[1]},${c.color[2]},0.3)`);
+      shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = shimGrad;
+      ctx.fillRect(-hw, -hh, c.w, c.h);
+      ctx.restore();
+    });
+
+    // ── Pokemon silhouettes ──
+    silhouettes.forEach((s, i) => {
+      s.pulse += s.pulseSpeed;
+      s.rotation += s.rotSpeed;
+      s.x += s.vx; s.y += s.vy;
+      if (s.x < -150 || s.x > W+150 || s.y < -150 || s.y > H+150) { silhouettes[i] = createSilhouette(false, i); return; }
+      const pa = s.alpha * (0.8 + 0.2 * Math.sin(s.pulse));
+      // glow
+      const gr = 50 * s.scale;
+      const glowGrad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, gr);
+      glowGrad.addColorStop(0, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${pa * 0.4})`);
+      glowGrad.addColorStop(1, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},0)`);
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath(); ctx.arc(s.x, s.y, gr, 0, Math.PI*2); ctx.fill();
+      // shape
+      ctx.save();
+      ctx.globalAlpha = pa;
+      ctx.translate(s.x, s.y); ctx.rotate(s.rotation);
+      ctx.fillStyle = `rgb(${s.color[0]},${s.color[1]},${s.color[2]})`;
+      ctx.strokeStyle = `rgb(${s.color[0]},${s.color[1]},${s.color[2]})`;
+      ctx.save();
+      SHAPES[s.shape](ctx, s.scale);
+      ctx.restore();
+      ctx.restore();
+    });
+
+    // ── Shooting stars ──
+    stars.forEach((s, i) => {
+      if (s.delay > 0) { s.delay -= 0.008; return; }
+      s.life += 0.012;
+      s.x += s.vx; s.y += s.vy;
+      if (s.life > s.maxLife || s.x > W + 40) { stars[i] = createStar(false); return; }
+      const lr = s.life / s.maxLife;
+      const a = lr < 0.2 ? lr/0.2 : lr > 0.7 ? (1-lr)/0.3 : 1;
+      const grad = ctx.createLinearGradient(s.x - s.len, s.y - s.vy * s.len/s.vx, s.x, s.y);
+      grad.addColorStop(0, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},0)`);
+      grad.addColorStop(1, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${a * 0.6})`);
+      ctx.beginPath(); ctx.moveTo(s.x - s.len, s.y - s.vy * s.len/s.vx); ctx.lineTo(s.x, s.y);
+      ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+      // head sparkle
+      ctx.beginPath(); ctx.arc(s.x, s.y, 1.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${a * 0.9})`; ctx.fill();
+    });
+
+    // ── Particles ──
+    particles.forEach((p, i) => {
+      p.life += 0.004;
+      p.twinkle += p.twinkleSpeed;
+      p.x += p.vx; p.y += p.vy;
+      if (p.trail) { p.history.push({x: p.x, y: p.y}); if (p.history.length > p.trailLen) p.history.shift(); }
+      if (p.life > p.maxLife || p.y < -10) { particles[i] = createParticle(false); return; }
+      const lr = p.life / p.maxLife;
+      const fade = lr < 0.1 ? lr*10 : lr > 0.8 ? (1-lr)*5 : 1;
+      const ta = p.alpha * fade * (0.5 + 0.5 * Math.sin(p.twinkle));
+      // trail
+      if (p.trail && p.history.length > 1) {
+        for (let j = 1; j < p.history.length; j++) {
+          const t = j / p.history.length;
+          ctx.beginPath(); ctx.moveTo(p.history[j-1].x, p.history[j-1].y); ctx.lineTo(p.history[j].x, p.history[j].y);
+          ctx.strokeStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${ta * t * 0.4})`;
+          ctx.lineWidth = p.r * t; ctx.stroke();
+        }
+      }
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${ta})`; ctx.fill();
+      // cross sparkle
+      if (p.r > 2) {
+        const len = p.r * 4;
+        ctx.strokeStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${ta * 0.4})`;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(p.x-len, p.y); ctx.lineTo(p.x+len, p.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(p.x, p.y-len); ctx.lineTo(p.x, p.y+len); ctx.stroke();
+      }
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Tweaks panel (inline) ──────────────────────────────────────────────────
+
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues(prev => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = useState(false);
+  const dragRef = useRef(null);
+  const offsetRef = useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+  }, [open, clampToViewport]);
+
+  useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = { x: startRight - (ev.clientX - sx), y: startBottom - (ev.clientY - sy) };
+      clampToViewport();
+    };
+    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <div ref={dragRef} className="twk-panel" data-noncommentable=""
+         style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+      <div className="twk-hd" onMouseDown={onDragStart}>
+        <b>{title}</b>
+        <button className="twk-x" onMouseDown={e => e.stopPropagation()} onClick={dismiss}>✕</button>
+      </div>
+      <div className="twk-body">{children}</div>
+    </div>
+  );
+}
+
+function TweakSection({ title, children }) {
+  return <><div className="twk-sect">{title}</div>{children}</>;
+}
+
+function TweakRow({ label, children }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      {children}
+    </div>
+  );
+}
+
+function TweakToggle({ label, tweakKey, tweaks, setTweak }) {
+  const value = tweaks[tweakKey];
+  return (
+    <TweakRow label={label}>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              onClick={() => setTweak(tweakKey, !value)}><i /></button>
+    </TweakRow>
+  );
+}
+
+function TweakColor({ label, tweakKey, tweaks, setTweak }) {
+  return (
+    <TweakRow label={label}>
+      <input type="color" className="twk-swatch" value={tweaks[tweakKey]}
+             onChange={e => setTweak(tweakKey, e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakRadio({ label, tweakKey, tweaks, setTweak, options }) {
+  const trackRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const value = tweaks[tweakKey];
+  const opts = options.map(o => typeof o === 'object' ? o : { value: o, label: o });
+  const idx = Math.max(0, opts.findIndex(o => o.value === value));
+  const n = opts.length;
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const i = Math.floor(((clientX - r.left - 2) / (r.width - 4)) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) setTweak(tweakKey, v0);
+    const move = (ev) => { if (!trackRef.current) return; const v = segAt(ev.clientX); if (v !== valueRef.current) setTweak(tweakKey, v); };
+    const up = () => { setDragging(false); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <div className="twk-row">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <div ref={trackRef} className={dragging ? 'twk-seg dragging' : 'twk-seg'} onPointerDown={onPointerDown}>
+        <div className="twk-seg-thumb" style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`, width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map(o => <button key={o.value} type="button">{o.label}</button>)}
+      </div>
+    </div>
+  );
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────────
+
+const IconMail = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+  </svg>
+);
+const IconUser = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </svg>
+);
+const IconLock = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+const IconEye = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+const IconEyeOff = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+);
+const IconCheck = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+const IconGoogle = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
+const IconDiscord = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="#5865F2">
+    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.045.033.05a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+  </svg>
+);
+
+// ── Pokeball logo SVG ─────────────────────────────────────────────────────
+
+const PokeballLogo = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="32" cy="32" r="30" stroke="#c9a227" strokeWidth="1.5" opacity="0.6"/>
+    <path d="M2 32 Q2 2 32 2 Q62 2 62 32 Z" fill="url(#topGrad)" opacity="0.7"/>
+    <path d="M2 32 Q2 62 32 62 Q62 62 62 32 Z" fill="url(#botGrad)" opacity="0.5"/>
+    <line x1="2" y1="32" x2="62" y2="32" stroke="#c9a227" strokeWidth="1" opacity="0.6"/>
+    <circle cx="32" cy="32" r="9" fill="#0a0a0f" stroke="#c9a227" strokeWidth="1.5"/>
+    <circle cx="32" cy="32" r="5" fill="url(#centerGrad)" opacity="0.9"/>
+    <circle cx="32" cy="32" r="2" fill="#e8c547" opacity="0.8"/>
+    <defs>
+      <radialGradient id="topGrad" cx="50%" cy="0%" r="80%">
+        <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.8"/>
+        <stop offset="100%" stopColor="#c9a227" stopOpacity="0.2"/>
+      </radialGradient>
+      <radialGradient id="botGrad" cx="50%" cy="100%" r="80%">
+        <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5"/>
+        <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.1"/>
+      </radialGradient>
+      <radialGradient id="centerGrad" cx="30%" cy="30%" r="70%">
+        <stop offset="0%" stopColor="#e8c547"/>
+        <stop offset="100%" stopColor="#8a6e1a"/>
+      </radialGradient>
+    </defs>
+  </svg>
+);
+
+// ── Password strength ─────────────────────────────────────────────────────
+
+function getStrength(pw) {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return s;
+}
+const strengthColors = ['', '#f43f5e','#f97316','#eab308','#10b981'];
+const strengthLabels = ['', 'Weak','Fair','Good','Strong'];
+
+// ── Main App ──────────────────────────────────────────────────────────────
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#c9a227",
+  "cardStyle": "charcoal",
+  "showSocial": true
+}/*EDITMODE-END*/;
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  const [tab, setTab] = useState('login');
+  const [showPw, setShowPw] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [shake, setShake] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailErr, setEmailErr] = useState('');
+  const [passErr, setPassErr] = useState('');
+
+  const [rName, setRName] = useState('');
+  const [rEmail, setREmail] = useState('');
+  const [rPass, setRPass] = useState('');
+  const [rPass2, setRPass2] = useState('');
+  const [rNameErr, setRNameErr] = useState('');
+  const [rEmailErr, setREmailErr] = useState('');
+  const [rPassErr, setRPassErr] = useState('');
+  const [rPass2Err, setRPass2Err] = useState('');
+
+  const strength = getStrength(rPass);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--gold', tweaks.accentColor);
+    // derive light/dim from accent
+    document.documentElement.style.setProperty('--gold-light', tweaks.accentColor);
+  }, [tweaks.accentColor]);
+
+  const cardBg = tweaks.cardStyle === 'glass'
+    ? { background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(24px)' }
+    : tweaks.cardStyle === 'charcoal'
+    ? { background: '#1a1a2a' }
+    : {};
+
+  const validateLogin = () => {
+    let ok = true;
+    if (!email) { setEmailErr('Enter your email or username'); ok = false; } else setEmailErr('');
+    if (!password) { setPassErr('Enter your password'); ok = false; } else setPassErr('');
+    return ok;
+  };
+
+  const validateRegister = () => {
+    let ok = true;
+    if (!rName.trim()) { setRNameErr('Enter your name'); ok = false; } else setRNameErr('');
+    if (!rEmail || !/\S+@\S+\.\S+/.test(rEmail)) { setREmailErr('Invalid email'); ok = false; } else setREmailErr('');
+    if (rPass.length < 8) { setRPassErr('Minimum 8 characters'); ok = false; } else setRPassErr('');
+    if (rPass !== rPass2) { setRPass2Err('Passwords do not match'); ok = false; } else setRPass2Err('');
+    return ok;
+  };
+
+  const handleSubmit = () => {
+    const valid = tab === 'login' ? validateLogin() : validateRegister();
+    if (!valid) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => { setLoading(false); setSuccess(true); setTimeout(() => { window.location.href = 'Codemon Launcher.html'; }, 1800); }, 1600);
+  };
+
+  return (
+    <>
+      <div className="login-card" style={{
+        ...cardBg,
+        animation: shake ? 'shakeCard 0.5s ease' : 'cardReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both'
+      }}>
+
+        {success && (
+          <div className="success-overlay">
+            <div className="success-icon"><IconCheck /></div>
+            <div className="success-title">Welcome!</div>
+            <div className="success-sub">Entrando a Codemon TCG…</div>
+          </div>
+        )}
+
+        <div className="logo-area">
+          <div className="logo-emblem"><PokeballLogo /></div>
+          <div className="logo-title">CODEMON</div>
+          <div className="logo-subtitle">Trading Card Game</div>
+        </div>
+
+        <div className="tab-row">
+          <button className={`tab-btn${tab === 'login' ? ' active' : ''}`} onClick={() => setTab('login')}>LOG IN</button>
+          <button className={`tab-btn${tab === 'register' ? ' active' : ''}`} onClick={() => setTab('register')}>REGISTRARSE</button>
+        </div>
+
+        <div className="form-fields">
+          {tab === 'login' ? (
+            <>
+              <div className="field-group">
+                <div className="field-label">Email or username</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconMail /></span>
+                  <input type="text" className={`field-input${emailErr ? ' error' : ''}`} placeholder="entrenador@codemon.com"
+                    value={email} onChange={e => { setEmail(e.target.value); setEmailErr(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+                </div>
+                {emailErr && <div className="error-msg">⚠ {emailErr}</div>}
+              </div>
+
+              <div className="field-group">
+                <div className="field-label">Password</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconLock /></span>
+                  <input type={showPw ? 'text' : 'password'} className={`field-input${passErr ? ' error' : ''}`} placeholder="••••••••••"
+                    value={password} onChange={e => { setPassword(e.target.value); setPassErr(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+                  <button className="eye-btn" type="button" onClick={() => setShowPw(!showPw)}>
+                    {showPw ? <IconEyeOff /> : <IconEye />}
+                  </button>
+                </div>
+                {passErr && <div className="error-msg">⚠ {passErr}</div>}
+              </div>
+
+              <div className="options-row">
+                <label className="remember-label">
+                  <div className={`remember-box${remember ? ' checked' : ''}`} onClick={() => setRemember(!remember)}>
+                    {remember && (
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#c9a227" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="2 6 5 9 10 3"/>
+                      </svg>
+                    )}
+                  </div>
+                  Recordarme
+                </label>
+                <a href="#" className="forgot-link">Forgot your password?</a>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="field-group">
+                <div className="field-label">Trainer name</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconUser /></span>
+                  <input type="text" className={`field-input${rNameErr ? ' error' : ''}`} placeholder="Ash Ketchum"
+                    value={rName} onChange={e => { setRName(e.target.value); setRNameErr(''); }} />
+                </div>
+                {rNameErr && <div className="error-msg">⚠ {rNameErr}</div>}
+              </div>
+
+              <div className="field-group">
+                <div className="field-label">Email address</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconMail /></span>
+                  <input type="email" className={`field-input${rEmailErr ? ' error' : ''}`} placeholder="ash@codemon.com"
+                    value={rEmail} onChange={e => { setREmail(e.target.value); setREmailErr(''); }} />
+                </div>
+                {rEmailErr && <div className="error-msg">⚠ {rEmailErr}</div>}
+              </div>
+
+              <div className="field-group">
+                <div className="field-label">Password</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconLock /></span>
+                  <input type={showPw ? 'text' : 'password'} className={`field-input${rPassErr ? ' error' : ''}`} placeholder="Minimum 8 characters"
+                    value={rPass} onChange={e => { setRPass(e.target.value); setRPassErr(''); }} />
+                  <button className="eye-btn" type="button" onClick={() => setShowPw(!showPw)}>
+                    {showPw ? <IconEyeOff /> : <IconEye />}
+                  </button>
+                </div>
+                {rPass.length > 0 && (
+                  <div className="strength-bar">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="strength-seg" style={{ background: i <= strength ? strengthColors[strength] : undefined }}></div>
+                    ))}
+                    <span style={{ fontSize:'10px', color: strengthColors[strength] || 'var(--text-dim)', marginLeft:'6px', fontFamily:'Cinzel,serif', letterSpacing:'0.1em' }}>
+                      {strengthLabels[strength]}
+                    </span>
+                  </div>
+                )}
+                {rPassErr && <div className="error-msg">⚠ {rPassErr}</div>}
+              </div>
+
+              <div className="field-group">
+                <div className="field-label">Confirm password</div>
+                <div className="field-wrapper">
+                  <span className="field-icon"><IconLock /></span>
+                  <input type={showPw2 ? 'text' : 'password'} className={`field-input${rPass2Err ? ' error' : ''}`} placeholder="Repeat your password"
+                    value={rPass2} onChange={e => { setRPass2(e.target.value); setRPass2Err(''); }} />
+                  <button className="eye-btn" type="button" onClick={() => setShowPw2(!showPw2)}>
+                    {showPw2 ? <IconEyeOff /> : <IconEye />}
+                  </button>
+                </div>
+                {rPass2Err && <div className="error-msg">⚠ {rPass2Err}</div>}
+              </div>
+            </>
+          )}
+
+          <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
+            <div className="btn-inner">
+              {loading ? <><div className="spinner"></div> Verificando…</> : (tab === 'login' ? '⚡ ENTRAR AL JUEGO' : '🎴 CREAR CUENTA')}
+            </div>
+          </button>
+        </div>
+
+        {tweaks.showSocial && (
+          <>
+            <div className="divider">
+              <div className="divider-line"></div>
+              <span className="divider-text">or continue with</span>
+              <div className="divider-line"></div>
+            </div>
+            <div className="social-row">
+              <button className="social-btn"><IconGoogle /> Google</button>
+              <button className="social-btn"><IconDiscord /> Discord</button>
+            </div>
+          </>
+        )}
+
+        <div className="card-footer">
+          {tab === 'login'
+            ? <span>Don't have an account? <a href="#" onClick={e => { e.preventDefault(); setTab('register'); }}>Register for free</a></span>
+            : <span>Already have an account? <a href="#" onClick={e => { e.preventDefault(); setTab('login'); }}>Log in</a></span>
+          }
+        </div>
+      </div>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Color">
+          <TweakColor label="Acento dorado" tweakKey="accentColor" tweaks={tweaks} setTweak={setTweak} />
+        </TweakSection>
+        <TweakSection title="Tarjeta">
+          <TweakRadio label="Fondo" tweakKey="cardStyle" tweaks={tweaks} setTweak={setTweak}
+            options={[{label:'Dark',value:'dark'},{label:'Glass',value:'glass'},{label:'Charcoal',value:'charcoal'}]} />
+        </TweakSection>
+        <TweakSection title="Opciones">
+          <TweakToggle label="Login social" tweakKey="showSocial" tweaks={tweaks} setTweak={setTweak} />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

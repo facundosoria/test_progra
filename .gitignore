@@ -1,0 +1,56 @@
+# ── Sistema operativo ─────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# ── Variables de entorno — NUNCA commitear ────────────────────
+.env
+*.env.local
+
+# ── Certificados TLS — NUNCA commitear claves privadas ─────────
+infra/certs/
+front/certs/
+*.key
+*.pem
+
+# ── Java / Maven ──────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+# ── Spring Boot ───────────────────────────────────────────────
+spring-*.log
+logs/
+*.log
+
+# ── Angular / Node ────────────────────────────────────────────
+node_modules/
+dist/
+.angular/
+.browserslistrc
+npm-debug.log*
+yarn-error.log
+
+# ── Testing ───────────────────────────────────────────────────
+/api/target/site/
+/front/coverage/
+/front/test-results/
+playwright-report/
+playwright/.cache/
+
+# ── Docker ────────────────────────────────────────────────────
+.docker-data/
+
+# ── IDEs ──────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.swp
+*~
+
+# ── PDFs generados del handoff ────────────────────────────────
+docs/09-handoff/*.pdf

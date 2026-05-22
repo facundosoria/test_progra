@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codemon — Game Lobby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --panel: #0f0f1a;
+      --card: #13131f;
+      --gold: #c9a227;
+      --gold-light: #e8c547;
+      --gold-dim: #8a6e1a;
+      --text: #f0e8d0;
+      --text-sec: #8a8090;
+      --text-dim: #4a4456;
+      --border: rgba(201,162,39,0.18);
+      --border-h: rgba(201,162,39,0.45);
+      --red: #f43f5e;
+      --blue: #0ea5e9;
+      --green: #10b981;
+      --purple: #7c3aed;
+    }
+    html, body { height: 100%; background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--text); overflow: hidden; }
+    #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+
+    /* BG Canvas */
+    #bgCanvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
+
+    /* ── Shared ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes scaleIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+    @keyframes slideRight { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,0.3);} 50%{box-shadow:0 0 0 12px rgba(201,162,39,0);} }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes queuePulse { 0%,100%{opacity:0.4;transform:scale(1);} 50%{opacity:1;transform:scale(1.05);} }
+    @keyframes dotBounce { 0%,80%,100%{transform:scale(0);} 40%{transform:scale(1);} }
+
+    @property --holo-angle { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+    @keyframes holoSpin { from{--holo-angle:0deg;} to{--holo-angle:360deg;} }
+
+    .lobby-shell {
+      position: relative; z-index: 10;
+      width: 860px;
+      min-height: 540px;
+      background: var(--panel);
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,162,39,0.04), inset 0 1px 0 rgba(201,162,39,0.08);
+      overflow: hidden;
+      animation: scaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* Holo border */
+    .lobby-shell::before {
+      content:''; position:absolute; inset:-1px; border-radius:29px; z-index:-1;
+      background: conic-gradient(from var(--holo-angle,0deg), rgba(124,58,237,0) 0%, rgba(124,58,237,0.3) 10%, rgba(14,165,233,0.3) 20%, rgba(16,185,129,0.2) 30%, rgba(201,162,39,0.4) 40%, rgba(244,63,94,0.2) 50%, rgba(201,162,39,0) 70%);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude; padding:1px;
+      animation: holoSpin 10s linear infinite; opacity:0.4;
+    }
+
+    /* ── Header ── */
+    .lobby-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 28px 0;
+      animation: fadeUp 0.4s 0.1s both;
+    }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+      color: var(--text-sec); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { border-color: var(--border-h); color: var(--text); }
+    .lobby-title {
+      font-family: 'Cinzel Decorative', serif; font-size: 18px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .lobby-step {
+      margin-left: auto;
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em;
+      color: var(--text-dim); text-transform: uppercase;
+    }
+
+    /* ── Step progress ── */
+    .step-bar {
+      display: flex; align-items: center; gap: 0;
+      padding: 16px 28px 0;
+      animation: fadeUp 0.4s 0.15s both;
+    }
+    .step-node {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .step-node.done { color: var(--gold-dim); }
+    .step-node.active { color: var(--gold-light); }
+    .step-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid var(--text-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-family: 'Cinzel', serif; font-weight: 700;
+      transition: all 0.3s;
+    }
+    .step-node.done .step-dot { border-color: var(--gold-dim); background: rgba(201,162,39,0.1); color: var(--gold); }
+    .step-node.active .step-dot { border-color: var(--gold); background: rgba(201,162,39,0.15); color: var(--gold-light); box-shadow: 0 0 0 3px rgba(201,162,39,0.12); }
+    .step-line {
+      flex: 1; height: 1px; margin: 0 10px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .step-line.done { background: rgba(201,162,39,0.3); }
+
+    /* ── Body ── */
+    .lobby-body { padding: 24px 28px 28px; }
+
+    /* ── MODE SELECT ── */
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+
+    .mode-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s calc(var(--d,0)*0.1s + 0.2s) both;
+    }
+    .mode-card:hover { border-color: var(--border-h); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.5); }
+    .mode-card.selected { border-color: var(--mc, var(--gold)); box-shadow: 0 0 0 1px var(--mc,var(--gold)), 0 12px 36px rgba(0,0,0,0.4); }
+
+    .mode-card::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 80% at 50% 0%, var(--mc-glow, rgba(201,162,39,0.06)) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .mode-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 4px 16px var(--mc-glow, rgba(201,162,39,0.3)));
+    }
+
+    @keyframes robotFloat {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes robotBlink {
+      0%,88%,100% { transform: scaleY(1); }
+      93% { transform: scaleY(0.08); }
+    }
+    @keyframes robotWave {
+      0%,100% { transform: rotate(0deg); }
+      30% { transform: rotate(20deg); }
+      70% { transform: rotate(-6deg); }
+    }
+    @keyframes antennaGlow {
+      0%,100% { opacity: 0.7; }
+      50% { opacity: 1; filter: drop-shadow(0 0 4px #34d399); }
+    }
+    @keyframes swordShake {
+      0%,100% { transform: rotate(0deg); }
+      20% { transform: rotate(1.2deg); }
+      60% { transform: rotate(-1.2deg); }
+    }
+    @keyframes sparkFlicker {
+      0%,100% { opacity: 0.9; }
+      50% { opacity: 0.2; }
+    }
+    .robot-float { animation: robotFloat 2.8s ease-in-out infinite; }
+    .robot-eye-l { animation: robotBlink 4s ease-in-out infinite; transform-origin: center; }
+    .robot-eye-r { animation: robotBlink 4s ease-in-out infinite 0.15s; transform-origin: center; }
+    .robot-arm-r { animation: robotWave 2.2s ease-in-out infinite; transform-origin: 62px 52px; }
+    .robot-antenna { animation: antennaGlow 1.6s ease-in-out infinite; }
+    .sword-group { animation: swordShake 2.2s ease-in-out infinite; transform-origin: 44px 42px; }
+    .spark-1 { animation: sparkFlicker 1.1s ease-in-out infinite; }
+    .spark-2 { animation: sparkFlicker 1.1s ease-in-out infinite 0.18s; }
+    .spark-3 { animation: sparkFlicker 1.1s ease-in-out infinite 0.36s; }
+    .spark-4 { animation: sparkFlicker 1.1s ease-in-out infinite 0.27s; }
+    .spark-5 { animation: sparkFlicker 1.1s ease-in-out infinite 0.45s; }
+    .mode-name {
+      font-family: 'Cinzel Decorative', serif; font-size: 20px; font-weight: 900;
+      color: var(--mc, var(--gold-light)); margin-bottom: 6px;
+    }
+    .mode-sub { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 16px; }
+    .mode-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mode-tag {
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.12em;
+      padding: 3px 9px; border-radius: 999px;
+      border: 1px solid; text-transform: uppercase; font-weight: 700;
+    }
+
+    .mode-select-btn {
+      position: absolute; bottom: 20px; right: 20px;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s;
+      color: var(--text-dim);
+    }
+    .mode-card:hover .mode-select-btn,
+    .mode-card.selected .mode-select-btn {
+      border-color: var(--mc, var(--gold));
+      background: rgba(201,162,39,0.1);
+      color: var(--mc, var(--gold));
+    }
+
+    /* ── PvE DIFFICULTY ── */
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
+
+    .diff-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 16px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+      position: relative; overflow: hidden;
+      animation: fadeUp 0.4s calc(var(--d,0)*0.08s + 0.1s) both;
+    }
+    .diff-card:hover { border-color: var(--dc, var(--gold)); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.4); }
+    .diff-card.selected { border-color: var(--dc, var(--gold)); box-shadow: 0 0 0 1px var(--dc,var(--gold)); }
+    .diff-card::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--dc-glow,rgba(201,162,39,0.07)) 0%, transparent 70%); pointer-events:none; }
+
+    .diff-emoji { font-size: 36px; margin-bottom: 12px; display: block; }
+    .diff-name { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--dc, var(--gold-light)); margin-bottom: 4px; }
+    .diff-desc { font-size: 11px; color: var(--text-sec); line-height: 1.5; }
+    .diff-stars { margin-top: 10px; display: flex; justify-content: center; gap: 3px; }
+    .diff-star { font-size: 12px; }
+
+    .pve-confirm-btn {
+      width: 100%; margin-top: 18px;
+      padding: 14px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #b8891f, #c9a227, #e8c547, #c9a227);
+      background-size: 200% auto;
+      font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700;
+      letter-spacing: 0.15em; color: #0a0a0f; cursor: pointer;
+      transition: all 0.3s; box-shadow: 0 4px 20px rgba(201,162,39,0.3);
+      text-transform: uppercase; animation: fadeUp 0.4s 0.35s both;
+    }
+    .pve-confirm-btn:hover { background-position: right center; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(201,162,39,0.45); }
+    .pve-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── PvP OPTIONS ── */
+    .pvp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
+
+    .pvp-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 16px 20px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+      position: relative; overflow: hidden;
+      animation: fadeUp 0.4s calc(var(--d,0)*0.08s + 0.1s) both;
+    }
+    .pvp-card:hover { border-color: var(--pc, var(--blue)); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.4); }
+    .pvp-card.selected { border-color: var(--pc, var(--blue)); box-shadow: 0 0 0 1px var(--pc, var(--blue)); }
+    .pvp-card::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--pc-glow,rgba(14,165,233,0.07)) 0%, transparent 70%); pointer-events:none; }
+
+    .pvp-emoji { font-size: 36px; margin-bottom: 12px; display: block; }
+    .pvp-name { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--pc, var(--blue)); margin-bottom: 4px; }
+    .pvp-desc { font-size: 11px; color: var(--text-sec); line-height: 1.5; }
+
+    /* ── Sub-panels ── */
+    .sub-panel {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    /* Create room */
+    .room-form { display: flex; flex-direction: column; gap: 12px; }
+    .form-row { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--text-sec); text-transform: uppercase; }
+    .form-input {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px;
+      font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text);
+      outline: none; transition: all 0.2s; caret-color: var(--gold);
+    }
+    .form-input::placeholder { color: var(--text-dim); }
+    .form-input:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(201,162,39,0.1); }
+
+    .options-row { display: flex; gap: 10px; }
+    .opt-chip {
+      flex: 1; padding: 9px; border: 1px solid var(--border);
+      border-radius: 8px; background: rgba(255,255,255,0.02);
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;
+      color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+      text-align: center; text-transform: uppercase;
+    }
+    .opt-chip:hover { border-color: var(--border-h); color: var(--text-sec); }
+    .opt-chip.on { border-color: var(--gold-dim); background: rgba(201,162,39,0.08); color: var(--gold); }
+
+    /* Join room */
+    .join-form { display: flex; gap: 10px; }
+    .join-input {
+      flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 700;
+      color: var(--gold-light); outline: none; transition: all 0.2s;
+      caret-color: var(--gold); letter-spacing: 0.3em; text-align: center;
+      text-transform: uppercase;
+    }
+    .join-input::placeholder { color: var(--text-dim); letter-spacing: 0.1em; font-size: 13px; font-weight: 400; }
+    .join-input:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(201,162,39,0.1); }
+    .join-btn {
+      padding: 12px 20px; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; color: #0a0a0f; cursor: pointer;
+      transition: all 0.2s; text-transform: uppercase;
+    }
+    .join-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .room-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .room-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .room-item:hover { border-color: var(--border-h); background: rgba(255,255,255,0.04); }
+    .room-code { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 0.15em; min-width: 70px; }
+    .room-host { font-size: 12px; color: var(--text-sec); flex: 1; }
+    .room-status { font-size: 10px; font-family: 'Cinzel', serif; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.08em; }
+    .status-open { background: rgba(16,185,129,0.15); color: #10b981; }
+    .status-full { background: rgba(244,63,94,0.12); color: #f43f5e; }
+    .room-join-btn {
+      padding: 5px 12px; border-radius: 6px;
+      border: 1px solid var(--border-h); background: rgba(201,162,39,0.08);
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.1em;
+      color: var(--gold); cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+    }
+    .room-join-btn:hover { background: rgba(201,162,39,0.2); }
+
+    /* Queue */
+    .queue-panel {
+      text-align: center;
+      padding: 20px 0 8px;
+      animation: fadeIn 0.4s ease both;
+    }
+    .queue-spinner {
+      position: relative;
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+    }
+    .queue-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      animation: spin var(--s,3s) linear infinite;
+    }
+    .queue-ring-1 { border-top-color: var(--gold); --s: 2.5s; }
+    .queue-ring-2 { inset: 8px; border-right-color: var(--blue); --s: 3.5s; animation-direction: reverse; }
+    .queue-ring-3 { inset: 16px; border-bottom-color: var(--purple); --s: 2s; }
+    .queue-core {
+      position: absolute; inset: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,162,39,0.2), rgba(201,162,39,0.05));
+      border: 1px solid rgba(201,162,39,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .queue-title { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--gold-light); margin-bottom: 8px; }
+    .queue-sub { font-size: 13px; color: var(--text-sec); margin-bottom: 16px; }
+    .queue-time { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .queue-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
+    .q-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold-dim);
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+    .q-dot:nth-child(2) { animation-delay: 0.16s; }
+    .q-dot:nth-child(3) { animation-delay: 0.32s; }
+
+    .queue-stats {
+      display: flex; justify-content: center; gap: 28px;
+      padding: 14px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .q-stat { text-align: center; }
+    .q-stat-val { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--gold); }
+    .q-stat-lbl { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+    .cancel-btn {
+      padding: 10px 28px; border: 1px solid var(--border);
+      border-radius: 10px; background: rgba(255,255,255,0.03);
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.12em;
+      color: var(--text-sec); cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+    }
+    .cancel-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* Buttons row */
+    .action-row {
+      display: flex; gap: 10px; margin-top: 16px;
+      animation: fadeUp 0.4s 0.4s both;
+    }
+    .pvp-action-btn {
+      flex: 1; padding: 13px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #b8891f, #c9a227, #e8c547, #c9a227);
+      background-size: 200% auto;
+      font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+      letter-spacing: 0.12em; color: #0a0a0f; cursor: pointer;
+      transition: all 0.3s; text-transform: uppercase;
+      box-shadow: 0 4px 18px rgba(201,162,39,0.25);
+    }
+    .pvp-action-btn:hover { background-position: right center; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,162,39,0.4); }
+    .pvp-action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Found match overlay */
+    .match-found {
+      position: absolute; inset: 0;
+      background: rgba(10,10,15,0.95);
+      border-radius: 28px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; z-index: 50;
+      animation: fadeIn 0.4s ease both;
+    }
+    .match-vs {
+      display: flex; align-items: center; gap: 24px;
+      animation: scaleIn 0.5s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .match-player {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .match-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      border: 2px solid;
+    }
+    .match-player-name { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; }
+    .match-player-rank { font-size: 11px; color: var(--text-sec); }
+    .vs-badge {
+      font-family: 'Cinzel Decorative', serif; font-size: 28px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 2px 8px rgba(201,162,39,0.4));
+    }
+    .match-title {
+      font-family: 'Cinzel Decorative', serif; font-size: 22px;
+      color: var(--gold-light);
+      animation: fadeUp 0.4s 0.4s both;
+    }
+    .match-sub {
+      font-size: 13px; color: var(--text-sec);
+      animation: fadeUp 0.4s 0.5s both;
+    }
+    .match-countdown {
+      font-family: 'Cinzel', serif; font-size: 48px; font-weight: 700;
+      color: var(--gold); animation: fadeUp 0.4s 0.5s both;
+      filter: drop-shadow(0 0 20px rgba(201,162,39,0.4));
+    }
+
+    /* Tweak panel */
+    .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:260px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:rgba(250,249,247,.78);color:#29261b;-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);font:11.5px/1.4 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+    .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none}
+    .twk-hd b{font-size:12px;font-weight:600}
+    .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px}
+    .twk-x:hover{background:rgba(0,0,0,.06)}
+    .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+    .twk-row{display:flex;flex-direction:column;gap:5px}
+    .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+    .twk-lbl{display:flex;justify-content:space-between;color:rgba(41,38,27,.72)}
+    .twk-lbl>span:first-child{font-weight:500}
+    .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.45);padding:10px 0 0}
+    .twk-sect:first-child{padding-top:0}
+    .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0;flex-shrink:0}
+    .twk-toggle[data-on="1"]{background:#34c759}
+    .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+    .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+    .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.06);user-select:none}
+    .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .15s,width .15s}
+    .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;border-radius:6px;cursor:default;padding:4px 6px}
+    .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;background:transparent;flex-shrink:0}
+    .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+    .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  </style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div id="root"></div>
+
+<!-- BG animation (same as login/launcher) -->
+<script>
+(function(){
+  const cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d');
+  function resize(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const TC=[[201,162,39],[244,63,94],[14,165,233],[124,58,237],[16,185,129],[234,179,8],[251,146,60],[99,102,241]];
+  const rc=()=>TC[Math.floor(Math.random()*TC.length)];
+  const rnd=(a,b)=>Math.random()*(b-a)+a;
+  const stars=Array.from({length:80},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:rnd(.2,1.2),a:rnd(.05,.25),tw:Math.random()*Math.PI*2,ts:rnd(.005,.02),c:rc()}));
+  const parts=Array.from({length:80},()=>mkP(true));
+  function mkP(ini){const c=rc();return{x:ini?Math.random()*window.innerWidth:Math.random()*window.innerWidth,y:ini?Math.random()*window.innerHeight:window.innerHeight+5,vx:(Math.random()-.5)*.4,vy:-rnd(.1,.7),r:rnd(.3,2.5),c,a:rnd(.1,.4),li:ini?Math.random():0,ml:rnd(.5,.9),tw:Math.random()*Math.PI*2,ts:rnd(.01,.05)};}
+  const orbs=Array.from({length:8},()=>mkO(true));
+  function mkO(ini){const c=rc();return{x:ini?Math.random()*window.innerWidth:(Math.random()>.5?-40:window.innerWidth+40),y:ini?Math.random()*window.innerHeight:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:rnd(10,28),c,a:rnd(.02,.08),pu:Math.random()*Math.PI*2,ps:rnd(.005,.018)};}
+  const cards=Array.from({length:10},()=>mkC(true));
+  function mkC(ini){const c=rc(),s=Math.random()>.5,cw=rnd(24,48),ch=cw*1.4;return{x:ini?Math.random()*window.innerWidth:(s?-cw:window.innerWidth+cw),y:ini?Math.random()*window.innerHeight:Math.random()*window.innerHeight,w:cw,h:ch,vx:ini?(Math.random()-.5)*.2:(s?1:-1)*rnd(.05,.3),vy:(Math.random()-.5)*.15,rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.004,c,a:rnd(.04,.15),pu:Math.random()*Math.PI*2,ps:rnd(.005,.015),ho:Math.random()*Math.PI*2};}
+  let frame=0;
+  function draw(){
+    frame++;ctx.clearRect(0,0,cv.width,cv.height);
+    const W=cv.width,H=cv.height;
+    stars.forEach(s=>{s.tw+=s.ts;const a=s.a*(.5+.5*Math.sin(s.tw));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(${s.c[0]},${s.c[1]},${s.c[2]},${a})`;ctx.fill();});
+    orbs.forEach((o,i)=>{o.pu+=o.ps;o.x+=o.vx;o.y+=o.vy;if(o.x<-80||o.x>W+80||o.y<-80||o.y>H+80){orbs[i]=mkO(false);return;}const pa=o.a*(.7+.3*Math.sin(o.pu));const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);g.addColorStop(0,`rgba(${o.c[0]},${o.c[1]},${o.c[2]},${pa*2})`);g.addColorStop(1,`rgba(${o.c[0]},${o.c[1]},${o.c[2]},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();});
+    cards.forEach((c,i)=>{c.pu+=c.ps;c.rot+=c.rs;c.x+=c.vx;c.y+=c.vy;if(c.x<-100||c.x>W+100||c.y<-100||c.y>H+100){cards[i]=mkC(false);return;}const pa=c.a*(.8+.2*Math.sin(c.pu));ctx.save();ctx.globalAlpha=pa;ctx.translate(c.x,c.y);ctx.rotate(c.rot);const hw=c.w/2,hh=c.h/2;ctx.beginPath();ctx.roundRect(-hw,-hh,c.w,c.h,3);ctx.fillStyle=`rgba(${c.c[0]},${c.c[1]},${c.c[2]},.05)`;ctx.fill();ctx.strokeStyle=`rgba(${c.c[0]},${c.c[1]},${c.c[2]},.35)`;ctx.lineWidth=.8;ctx.stroke();const sx=-hw+((frame*.5+c.ho*50)%(c.w+20))-10;const sg=ctx.createLinearGradient(sx,-hh,sx+8,hh);sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,`rgba(${c.c[0]},${c.c[1]},${c.c[2]},.25)`);sg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=sg;ctx.fillRect(-hw,-hh,c.w,c.h);ctx.restore();});
+    parts.forEach((p,i)=>{p.li+=.004;p.tw+=p.ts;p.x+=p.vx;p.y+=p.vy;if(p.li>p.ml||p.y<-10){parts[i]=mkP(false);return;}const lr=p.li/p.ml;const fade=lr<.1?lr*10:lr>.8?(1-lr)*5:1;const ta=p.a*fade*(.5+.5*Math.sin(p.tw));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c[0]},${p.c[1]},${p.c[2]},${ta})`;ctx.fill();});
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Tweaks ─────────────────────────────────────────────────────────────────
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((k, v) => {
+    const edits = typeof k === 'object' ? k : { [k]: v };
+    setValues(prev => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+function TweaksPanel({ title='Tweaks', children }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const off = useRef({ x:16, y:16 });
+  useEffect(() => {
+    const h = e => { const t=e?.data?.type; if(t==='__activate_edit_mode')setOpen(true); else if(t==='__deactivate_edit_mode')setOpen(false); };
+    window.addEventListener('message', h);
+    window.parent.postMessage({ type:'__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', h);
+  }, []);
+  const dismiss = () => { setOpen(false); window.parent.postMessage({ type:'__edit_mode_dismissed' }, '*'); };
+  const drag = e => {
+    const r=ref.current.getBoundingClientRect(),sx=e.clientX,sy=e.clientY,sr=window.innerWidth-r.right,sb=window.innerHeight-r.bottom;
+    const mv=ev=>{off.current={x:sr-(ev.clientX-sx),y:sb-(ev.clientY-sy)};ref.current.style.right=off.current.x+'px';ref.current.style.bottom=off.current.y+'px';};
+    const up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};
+    window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
+  };
+  if(!open) return null;
+  return (
+    <div ref={ref} className="twk-panel" style={{right:off.current.x,bottom:off.current.y}}>
+      <div className="twk-hd" onMouseDown={drag}><b>{title}</b><button className="twk-x" onMouseDown={e=>e.stopPropagation()} onClick={dismiss}>✕</button></div>
+      <div className="twk-body">{children}</div>
+    </div>
+  );
+}
+function TwkSection({title,children}){return <><div className="twk-sect">{title}</div>{children}</>;}
+function TwkRow({label,children}){return <div className="twk-row twk-row-h"><div className="twk-lbl"><span>{label}</span></div>{children}</div>;}
+function TwkToggle({label,tweakKey,tweaks,setTweak}){const v=tweaks[tweakKey];return <TwkRow label={label}><button type="button" className="twk-toggle" data-on={v?'1':'0'} onClick={()=>setTweak(tweakKey,!v)}><i/></button></TwkRow>;}
+
+// ── Mode Icons ──────────────────────────────────────────────────────────────
+const PveIcon = () => (
+  <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="pveGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#10b981" stopOpacity="0.25"/><stop offset="100%" stopColor="#10b981" stopOpacity="0"/></radialGradient>
+      <linearGradient id="pveBody" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#065f46"/></linearGradient>
+    </defs>
+    <circle cx="44" cy="44" r="42" fill="url(#pveGlow)"/>
+    <circle cx="44" cy="44" r="38" stroke="#10b981" strokeWidth="0.8" strokeOpacity="0.25" fill="none" strokeDasharray="3 3"/>
+    {/* Whole robot floats */}
+    <g className="robot-float">
+      {/* Antenna */}
+      <line x1="44" y1="18" x2="44" y2="10" stroke="#34d399" strokeWidth="2" strokeLinecap="round"/>
+      <circle className="robot-antenna" cx="44" cy="8" r="3.5" fill="#34d399"/>
+      <circle cx="44" cy="8" r="1.8" fill="#fff" opacity="0.9"/>
+      {/* Robot head */}
+      <rect x="28" y="18" width="32" height="26" rx="6" fill="url(#pveBody)"/>
+      {/* Eyes */}
+      <rect x="31" y="24" width="10" height="8" rx="2.5" fill="#0a0a0f"/>
+      <rect x="47" y="24" width="10" height="8" rx="2.5" fill="#0a0a0f"/>
+      <g className="robot-eye-l"><rect x="32.5" y="25.5" width="4" height="4" rx="1" fill="#34d399"/><circle cx="34" cy="27" r="1" fill="#fff" opacity="0.7"/></g>
+      <g className="robot-eye-r"><rect x="48.5" y="25.5" width="4" height="4" rx="1" fill="#34d399"/><circle cx="50" cy="27" r="1" fill="#fff" opacity="0.7"/></g>
+      {/* Mouth */}
+      <rect x="34" y="36" width="20" height="3.5" rx="1.5" fill="#0a0a0f" opacity="0.5"/>
+      <rect x="36" y="36.5" width="4" height="2.5" rx="1" fill="#34d399"/>
+      <rect x="42" y="36.5" width="4" height="2.5" rx="1" fill="#34d399"/>
+      <rect x="48" y="36.5" width="3" height="2.5" rx="1" fill="#34d399"/>
+      {/* Body */}
+      <rect x="26" y="46" width="36" height="28" rx="6" fill="url(#pveBody)"/>
+      <rect x="30" y="50" width="28" height="2" rx="1" fill="#0a0a0f" opacity="0.25"/>
+      {/* Chest orbs */}
+      <circle cx="36" cy="58" r="5" fill="#0a0a0f" opacity="0.4"/>
+      <circle cx="36" cy="58" r="3" fill="#34d399" opacity="0.8"/>
+      <circle cx="36" cy="58" r="1.2" fill="#fff" opacity="0.6"/>
+      <circle cx="52" cy="58" r="5" fill="#0a0a0f" opacity="0.4"/>
+      <circle cx="52" cy="58" r="3" fill="#34d399" opacity="0.8"/>
+      <circle cx="52" cy="58" r="1.2" fill="#fff" opacity="0.6"/>
+      {/* Left arm static */}
+      <rect x="14" y="48" width="12" height="8" rx="4" fill="url(#pveBody)"/>
+      {/* Right arm waves */}
+      <g className="robot-arm-r">
+        <rect x="62" y="48" width="12" height="8" rx="4" fill="url(#pveBody)"/>
+      </g>
+      {/* Legs */}
+      <rect x="30" y="73" width="10" height="12" rx="4" fill="url(#pveBody)"/>
+      <rect x="48" y="73" width="10" height="12" rx="4" fill="url(#pveBody)"/>
+      {/* Circuit lines */}
+      <path d="M30 56 L26 56 L26 62 L30 62" stroke="#34d399" strokeWidth="0.8" strokeOpacity="0.5" fill="none"/>
+      <path d="M58 56 L62 56 L62 62 L58 62" stroke="#34d399" strokeWidth="0.8" strokeOpacity="0.5" fill="none"/>
+    </g>
+    {/* Sparkles outside float group */}
+    <circle cx="16" cy="18" r="1.5" fill="#34d399" opacity="0.5"/>
+    <circle cx="72" cy="14" r="1" fill="#34d399" opacity="0.4"/>
+    <circle cx="10" cy="62" r="1" fill="#34d399" opacity="0.3"/>
+    <circle cx="78" cy="68" r="1.5" fill="#34d399" opacity="0.4"/>
+  </svg>
+);
+
+const PvpIcon = () => (
+  <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="pvpGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25"/><stop offset="100%" stopColor="#0ea5e9" stopOpacity="0"/></radialGradient>
+      <linearGradient id="swordGold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#92400e"/></linearGradient>
+      <linearGradient id="swordBlue" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#bae6fd"/><stop offset="100%" stopColor="#0369a1"/></linearGradient>
+    </defs>
+    <circle cx="44" cy="44" r="42" fill="url(#pvpGlow)"/>
+    <circle cx="44" cy="44" r="38" stroke="#0ea5e9" strokeWidth="0.8" strokeOpacity="0.25" fill="none" strokeDasharray="3 3"/>
+    {/* Swords shake together */}
+    <g className="sword-group">
+      {/* Sword 1 — gold */}
+      <line x1="16" y1="72" x2="66" y2="16" stroke="url(#swordGold)" strokeWidth="4" strokeLinecap="round"/>
+      <line x1="16" y1="72" x2="66" y2="16" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="33" y="37" width="16" height="5" rx="2.5" fill="#c9a227" transform="rotate(-50 41 39.5)"/>
+      <circle cx="18" cy="70" r="4" fill="#c9a227"/>
+      <circle cx="18" cy="70" r="2" fill="#fde68a"/>
+      {/* Sword 2 — blue */}
+      <line x1="72" y1="72" x2="22" y2="16" stroke="url(#swordBlue)" strokeWidth="4" strokeLinecap="round"/>
+      <line x1="72" y1="72" x2="22" y2="16" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="39" y="37" width="16" height="5" rx="2.5" fill="#0ea5e9" transform="rotate(50 47 39.5)"/>
+      <circle cx="70" cy="70" r="4" fill="#0ea5e9"/>
+      <circle cx="70" cy="70" r="2" fill="#bae6fd"/>
+      {/* Impact flash */}
+      <circle cx="44" cy="42" r="9" fill="white" opacity="0.08"/>
+      <circle cx="44" cy="42" r="5" fill="white" opacity="0.12"/>
+      <circle cx="44" cy="42" r="2.5" fill="white" opacity="0.2"/>
+    </g>
+    {/* Sparks flicker independently */}
+    <line className="spark-1" x1="44" y1="33" x2="44" y2="25" stroke="#ffd700" strokeWidth="2" strokeLinecap="round"/>
+    <line className="spark-2" x1="52" y1="36" x2="59" y2="29" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round"/>
+    <line className="spark-3" x1="36" y1="36" x2="29" y2="29" stroke="#c9a227" strokeWidth="1.5" strokeLinecap="round"/>
+    <line className="spark-4" x1="50" y1="46" x2="56" y2="52" stroke="#ffd700" strokeWidth="1.5" strokeLinecap="round"/>
+    <line className="spark-5" x1="38" y1="46" x2="32" y2="52" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round"/>
+    {/* Static dots */}
+    <circle cx="60" cy="22" r="2" fill="#ffd700" opacity="0.6"/>
+    <circle cx="28" cy="22" r="2" fill="#0ea5e9" opacity="0.6"/>
+    <circle cx="14" cy="44" r="1.5" fill="#0ea5e9" opacity="0.4"/>
+    <circle cx="74" cy="44" r="1.5" fill="#c9a227" opacity="0.4"/>
+  </svg>
+);
+
+// ── Queue Panel ───────────────────────────────────────────────────────────
+const QUEUE_MESSAGES = [
+  "Searching for an opponent...",
+  "Buscando dignos oponentes...",
+  "Buscando bajo las piedras...",
+  "Santoro failed everyone...",
+  "Checking your opponent's deck...",
+  "Preguntando en el vecindario...",
+  "Desempolvando entrenadores...",
+  "Nadie quiere pelear contigo...",
+  "Mandando palomas mensajeras...",
+  "Your reputation precedes you...",
+  "Checking the opponent Pokedex...",
+  "Calling Misty with a smoke signal...",
+  "The weak are hiding...",
+  "Revisando la lista negra...",
+  "Buscando alguien con coraje...",
+  "Gary Oak tampoco quiso...",
+  "Despertando entrenadores dormidos...",
+  "Notifying the Pokemon League...",
+  "Nadie survives este mazo...",
+  "A legendary opponent approaches...",
+];
+
+function QueuePanel({ queueTime, onCancel, onFound }) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [particles, setParticles] = useState([]);
+  const frameRef = useRef(0);
+
+  const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+  // Rotate messages with fade
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setMsgIdx(i => (i + 1) % QUEUE_MESSAGES.length);
+        setVisible(true);
+      }, 400);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Trigger found after 8s
+  useEffect(() => {
+    if (queueTime >= 8) {
+      setTimeout(onFound, 300);
+    }
+  }, [queueTime]);
+
+  // Floating energy particles for the spinner area
+  useEffect(() => {
+    const t = setInterval(() => {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 44 + Math.random() * 10;
+      setParticles(p => [...p.slice(-12), {
+        id: Date.now(),
+        x: Math.cos(angle) * r,
+        y: Math.sin(angle) * r,
+        color: ['#c9a227','#0ea5e9','#7c3aed','#10b981','#f43f5e'][Math.floor(Math.random()*5)],
+        life: 1,
+      }]);
+    }, 180);
+    return () => clearInterval(t);
+  }, []);
+
+  // Decay particles
+  useEffect(() => {
+    const t = setInterval(() => {
+      setParticles(p => p.map(x => ({ ...x, life: x.life - 0.06 })).filter(x => x.life > 0));
+    }, 50);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="queue-panel">
+      {/* Spinner with particles */}
+      <div className="queue-spinner" style={{ position:'relative', width:100, height:100, margin:'0 auto 20px' }}>
+        {/* Particle burst */}
+        {particles.map(p => (
+          <div key={p.id} style={{
+            position:'absolute',
+            left: `calc(50% + ${p.x}px)`,
+            top: `calc(50% + ${p.y}px)`,
+            width: 5, height: 5,
+            borderRadius:'50%',
+            background: p.color,
+            opacity: p.life,
+            transform:'translate(-50%,-50%)',
+            boxShadow:`0 0 6px ${p.color}`,
+            pointerEvents:'none',
+            transition:'opacity 0.05s',
+          }} />
+        ))}
+        <div className="queue-ring queue-ring-1"></div>
+        <div className="queue-ring queue-ring-2"></div>
+        <div className="queue-ring queue-ring-3"></div>
+        <div className="queue-core">⚡</div>
+      </div>
+
+      {/* Rotating message */}
+      <div style={{
+        height: 32,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        marginBottom: 6,
+        overflow:'hidden',
+      }}>
+        <div style={{
+          fontFamily:'Cinzel Decorative, serif',
+          fontSize: 15,
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #e8c547, #c9a227)',
+          WebkitBackgroundClip:'text',
+          WebkitTextFillColor:'transparent',
+          backgroundClip:'text',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(8px)',
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
+          textAlign:'center',
+          whiteSpace:'nowrap',
+        }}>
+          {QUEUE_MESSAGES[msgIdx]}
+        </div>
+      </div>
+
+      {/* Animated dots */}
+      <div className="queue-dots" style={{ marginBottom: 14 }}>
+        <div className="q-dot"></div>
+        <div className="q-dot"></div>
+        <div className="q-dot"></div>
+      </div>
+
+      {/* Timer */}
+      <div className="queue-time" style={{ marginBottom: 14 }}>{fmtTime(queueTime)}</div>
+
+      {/* Stats */}
+      <div className="queue-stats" style={{ marginBottom: 16 }}>
+        <div className="q-stat"><div className="q-stat-val">1,247</div><div className="q-stat-lbl">En cola</div></div>
+        <div className="q-stat"><div className="q-stat-val">~45s</div><div className="q-stat-lbl">Tiempo est.</div></div>
+        <div className="q-stat"><div className="q-stat-val">Oro</div><div className="q-stat-lbl">Tu rango</div></div>
+      </div>
+
+      <button className="cancel-btn" onClick={onCancel}>✕ Cancel Search</button>
+    </div>
+  );
+}
+
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#c9a227",
+  "showRooms": true
+}/*EDITMODE-END*/;
+
+const MOCK_ROOMS = [
+  { code:'PKM-4421', host:'AshMaster99', deck:'Fuego/Dragon', slots:'1/2', open:true },
+  { code:'PKM-8834', host:'MistyWave', deck:'Water/Psychic', slots:'1/2', open:true },
+  { code:'PKM-2290', host:'GaryOak_', deck:'Planta/Normal', slots:'2/2', open:false },
+  { code:'PKM-6617', host:'TrainerRed', deck:'Electric', slots:'1/2', open:true },
+];
+
+// ── App ────────────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // Steps: 'mode' | 'pve' | 'pvp' | 'queue' | 'found'
+  const [step, setStep] = useState('mode');
+  const [mode, setMode] = useState(null);       // 'pve' | 'pvp'
+  const [difficulty, setDifficulty] = useState(null);
+  const [pvpOption, setPvpOption] = useState(null); // 'create' | 'join' | 'queue'
+  const [roomName, setRoomName] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
+  const [queueTime, setQueueTime] = useState(0);
+  const [countdown, setCountdown] = useState(3);
+
+  // Queue timer
+  useEffect(() => {
+    if (step !== 'queue') return;
+    const t = setInterval(() => setQueueTime(x => x + 1), 1000);
+    return () => clearInterval(t);
+  }, [step]);
+
+  // Match found countdown
+  useEffect(() => {
+    if (step !== 'found') return;
+    if (countdown <= 0) return;
+    const t = setTimeout(() => setCountdown(x => x - 1), 1000);
+    return () => clearTimeout(t);
+  }, [step, countdown]);
+
+  const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+  const goBack = () => {
+    if (step === 'pve' || step === 'pvp') { setStep('mode'); setMode(null); setDifficulty(null); setPvpOption(null); }
+    else if (step === 'queue') { setStep('pvp'); setQueueTime(0); }
+    else if (step === 'found') { setStep('pvp'); setCountdown(3); }
+  };
+
+  const stepLabel = step === 'mode' ? 'Paso 1 de 2' : step === 'queue' || step === 'found' ? 'En cola…' : 'Paso 2 de 2';
+
+  const stepNodes = [
+    { key:'mode', label:'Modo' },
+    { key:'sub', label: mode === 'pve' ? 'Dificultad' : 'Opciones' },
+  ];
+
+  const getStepState = (key) => {
+    if (step === 'mode') return key === 'mode' ? 'active' : 'pending';
+    return key === 'mode' ? 'done' : 'active';
+  };
+
+  return (
+    <>
+      <div className="lobby-shell">
+
+        {/* Match Found overlay */}
+        {step === 'found' && (
+          <div className="match-found">
+            <div className="match-title">Opponent found!</div>
+            <div className="match-vs">
+              <div className="match-player">
+                <div className="match-avatar" style={{ background:'rgba(201,162,39,0.15)', borderColor:'var(--gold-dim)' }}>🎴</div>
+                <div className="match-player-name">You</div>
+                <div className="match-player-rank">⭐ Rango Oro</div>
+              </div>
+              <div className="vs-badge">VS</div>
+              <div className="match-player">
+                <div className="match-avatar" style={{ background:'rgba(14,165,233,0.15)', borderColor:'#0ea5e9' }}>💧</div>
+                <div className="match-player-name">MistyWave</div>
+                <div className="match-player-rank">⭐ Rango Oro</div>
+              </div>
+            </div>
+            <div className="match-sub">La batalla comienza en…</div>
+            <div className="match-countdown">{countdown > 0 ? countdown : 'GO!'}</div>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="lobby-header">
+          <button className="back-btn" onClick={step === 'mode' ? () => window.location.href = 'Codemon Launcher.html' : goBack}>←</button>
+          <div className="lobby-title">GAME LOBBY</div>
+          <div className="lobby-step">{stepLabel}</div>
+        </div>
+
+        {/* Step bar */}
+        {(step === 'mode' || step === 'pve' || step === 'pvp') && (
+          <div className="step-bar">
+            {stepNodes.map((n, i) => (
+              <React.Fragment key={n.key}>
+                <div className={`step-node ${getStepState(n.key)}`}>
+                  <div className="step-dot">
+                    {getStepState(n.key) === 'done' ? '✓' : i + 1}
+                  </div>
+                  {n.label}
+                </div>
+                {i < stepNodes.length - 1 && (
+                  <div className={`step-line ${getStepState('sub') !== 'pending' ? 'done' : ''}`}></div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+
+        <div className="lobby-body">
+
+          {/* ── STEP 1: MODE SELECT ── */}
+          {step === 'mode' && (
+            <div className="mode-grid">
+              <div
+                className={`mode-card${mode==='pve'?' selected':''}`}
+                style={{'--mc':'#10b981','--mc-glow':'rgba(16,185,129,0.08)','--d':0}}
+                onClick={() => { setMode('pve'); setStep('pve'); }}
+              >
+                <div className="mode-icon"><PveIcon /></div>
+                <div className="mode-name">PvE</div>
+                <div className="mode-sub">Juega contra la inteligencia artificial. Ideal para practicar tus estrategias y subir de nivel.</div>
+                <div className="mode-tags">
+                  <span className="mode-tag" style={{ borderColor:'rgba(16,185,129,0.4)', color:'#10b981' }}>Offline</span>
+                  <span className="mode-tag" style={{ borderColor:'rgba(16,185,129,0.3)', color:'#10b981' }}>3 niveles</span>
+                  <span className="mode-tag" style={{ borderColor:'rgba(16,185,129,0.3)', color:'#10b981' }}>Recompensas</span>
+                </div>
+                <div className="mode-select-btn">→</div>
+              </div>
+
+              <div
+                className={`mode-card${mode==='pvp'?' selected':''}`}
+                style={{'--mc':'#0ea5e9','--mc-glow':'rgba(14,165,233,0.08)','--d':1}}
+                onClick={() => { setMode('pvp'); setStep('pvp'); }}
+              >
+                <div className="mode-icon"><PvpIcon /></div>
+                <div className="mode-name">PvP</div>
+                <div className="mode-sub">Challenge real trainers from around the world. Climb the rankings and prove your skill.</div>
+                <div className="mode-tags">
+                  <span className="mode-tag" style={{ borderColor:'rgba(14,165,233,0.4)', color:'#0ea5e9' }}>Online</span>
+                  <span className="mode-tag" style={{ borderColor:'rgba(14,165,233,0.3)', color:'#0ea5e9' }}>Ranking</span>
+                  <span className="mode-tag" style={{ borderColor:'rgba(14,165,233,0.3)', color:'#0ea5e9' }}>Torneos</span>
+                </div>
+                <div className="mode-select-btn">→</div>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 2A: PvE DIFFICULTY ── */}
+          {step === 'pve' && (
+            <>
+              <div className="diff-grid">
+                {[
+                  { id:'easy', name:'Easy', emoji:'🌱', desc:'Basic AI with simple strategies. Perfect for learning the game.', stars:1, dc:'#10b981', dcg:'rgba(16,185,129,0.08)', d:0 },
+                  { id:'medium', name:'Media', emoji:'⚡', desc:'IA intermedia con combos y bloqueos. Requiere estrategia real.', stars:2, dc:'#eab308', dcg:'rgba(234,179,8,0.08)', d:1 },
+                  { id:'hard', name:'Hard', emoji:'💀', desc:'Master AI with optimal plays. Only for advanced trainers.', stars:3, dc:'#f43f5e', dcg:'rgba(244,63,94,0.08)', d:2 },
+                ].map(d => (
+                  <div
+                    key={d.id}
+                    className={`diff-card${difficulty===d.id?' selected':''}`}
+                    style={{'--dc':d.dc,'--dc-glow':d.dcg,'--d':d.d}}
+                    onClick={() => setDifficulty(d.id)}
+                  >
+                    <span className="diff-emoji">{d.emoji}</span>
+                    <div className="diff-name">{d.name}</div>
+                    <div className="diff-desc">{d.desc}</div>
+                    <div className="diff-stars">
+                      {[1,2,3].map(i => (
+                        <span key={i} className="diff-star" style={{ opacity: i <= d.stars ? 1 : 0.2 }}>⭐</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="pve-confirm-btn"
+                disabled={!difficulty}
+                onClick={() => setStep('found')}
+              >
+                {difficulty ? `⚔️ JUGAR EN MODO ${difficulty.toUpperCase()}` : 'SELECCIONA UNA DIFICULTAD'}
+              </button>
+            </>
+          )}
+
+          {/* ── STEP 2B: PvP OPTIONS ── */}
+          {(step === 'pvp' || step === 'queue') && step !== 'queue' && (
+            <>
+              <div className="pvp-grid">
+                {[
+                  { id:'create', name:'Create Room', emoji:'🏠', desc:'Create a private or public room and invite friends with a code.', pc:'#c9a227', pcg:'rgba(201,162,39,0.07)', d:0 },
+                  { id:'join', name:'Join Room', emoji:'🔑', desc:'Enter a friend room code to join their match.', pc:'#7c3aed', pcg:'rgba(124,58,237,0.07)', d:1 },
+                  { id:'queue', name:'Online Queue', emoji:'🌐', desc:'Automatically search for an opponent based on your ranking level.', pc:'#0ea5e9', pcg:'rgba(14,165,233,0.07)', d:2 },
+                ].map(o => (
+                  <div
+                    key={o.id}
+                    className={`pvp-card${pvpOption===o.id?' selected':''}`}
+                    style={{'--pc':o.pc,'--pc-glow':o.pcg,'--d':o.d}}
+                    onClick={() => setPvpOption(o.id)}
+                  >
+                    <span className="pvp-emoji">{o.emoji}</span>
+                    <div className="pvp-name">{o.name}</div>
+                    <div className="pvp-desc">{o.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Create room form */}
+              {pvpOption === 'create' && (
+                <div className="sub-panel">
+                  <div className="room-form">
+                    <div className="form-row">
+                      <div className="form-label">Room name</div>
+                      <input className="form-input" placeholder="Example: Ash's epic battle..." value={roomName} onChange={e => setRoomName(e.target.value)} />
+                    </div>
+                    <div className="form-row">
+                      <div className="form-label">Privacidad</div>
+                      <div className="options-row">
+                        <button className={`opt-chip${!isPrivate?' on':''}`} onClick={() => setIsPrivate(false)}>🌐 Public</button>
+                        <button className={`opt-chip${isPrivate?' on':''}`} onClick={() => setIsPrivate(true)}>🔒 Privada</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Join room form */}
+              {pvpOption === 'join' && (
+                <div className="sub-panel">
+                  <div className="form-label" style={{ marginBottom:10 }}>Enter the room code</div>
+                  <div className="join-form">
+                    <input
+                      className="join-input"
+                      placeholder="PKM-XXXX"
+                      value={joinCode}
+                      maxLength={8}
+                      onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                    />
+                    <button className="join-btn" disabled={joinCode.length < 4}>UNIRSE</button>
+                  </div>
+                  {tweaks.showRooms && (
+                    <>
+                      <div className="form-label" style={{ marginTop:16, marginBottom:8 }}>Available public rooms</div>
+                      <div className="room-list">
+                        {MOCK_ROOMS.map((r, i) => (
+                          <div key={i} className="room-item">
+                            <span className="room-code">{r.code}</span>
+                            <span className="room-host">{r.host} · {r.deck}</span>
+                            <span className="room-status">{r.open ? <span className="status-open">Abierta {r.slots}</span> : <span className="status-full">Llena</span>}</span>
+                            {r.open && <button className="room-join-btn" onClick={() => setStep('found')}>Enter</button>}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Action button */}
+              {pvpOption && pvpOption !== 'join' && (
+                <div className="action-row">
+                  <button
+                    className="pvp-action-btn"
+                    onClick={() => pvpOption === 'queue' ? setStep('queue') : setStep('found')}
+                  >
+                    {pvpOption === 'create' ? '🏠 CREAR SALA' : '🌐 BUSCAR RIVAL'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ── QUEUE ── */}
+          {step === 'queue' && <QueuePanel queueTime={queueTime} onCancel={() => { setStep('pvp'); setQueueTime(0); }} onFound={() => setStep('found')} />}
+
+        </div>
+      </div>
+
+      <TweaksPanel title="Tweaks">
+        <TwkSection title="Opciones">
+          <TwkToggle label="Show public rooms" tweakKey="showRooms" tweaks={tweaks} setTweak={setTweak} />
+        </TwkSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

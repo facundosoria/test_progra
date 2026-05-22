@@ -1,0 +1,97 @@
+name: Project Automation
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, closed]
+  issues:
+    types: [opened, closed]
+  create:  # cuando se crea una rama
+
+jobs:
+  # Cuando se abre un PR → mover issue a "En revisión"
+  pr-opened:
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'ready_for_review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move linked issues to En revisión
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            // Buscar "Closes #N", "Fixes #N", "Resolves #N"
+            const issueRefs = body.match(/(?:closes|fixes|resolves)\s+#(\d+)/gi) || [];
+            for (const ref of issueRefs) {
+              const issueNumber = parseInt(ref.match(/\d+/)[0]);
+              // Agregar comentario para tracking
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `🔍 **PR #${pr.number} abierto** — Issue movido a **En revisión**\n\nRevisor: asignar antes de 24h.`
+              });
+              // Agregar label
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: ['in-review']
+              });
+            }
+
+  # Cuando se mergea un PR → cerrar issue y marcar Done
+  pr-merged:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close linked issues and mark Done
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const issueRefs = body.match(/(?:closes|fixes|resolves)\s+#(\d+)/gi) || [];
+            for (const ref of issueRefs) {
+              const issueNumber = parseInt(ref.match(/\d+/)[0]);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `✅ **PR #${pr.number} mergeado** — Issue completado.\n\nMergeado por: @${pr.merged_by.login}`
+              });
+              // Remover label in-review
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: 'in-review'
+                });
+              } catch(e) {}
+            }
+
+  # Cuando se abre un Issue nuevo → notificar y verificar template
+  issue-opened:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate issue has required fields
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+            // Si no tiene label de tipo conocido, agregar aviso
+            const knownTypes = ['epic', 'historia', 'bug'];
+            const hasType = labels.some(l => knownTypes.includes(l));
+            if (!hasType) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `⚠️ Este issue no tiene un label de tipo (\`epic\`, \`historia\`, \`bug\`). Por favor agregá uno para que aparezca correctamente en el Project.`
+              });
+            }

@@ -1,0 +1,97 @@
+name: "📖 Historia de Usuario"
+description: "Unidad de valor entregable desde la perspectiva del usuario"
+labels: ["historia"]
+body:
+  - type: markdown
+    attributes:
+      value: "## Historia de Usuario"
+  - type: input
+    id: hu-id
+    attributes:
+      label: "ID"
+      placeholder: "HU-01-01"
+    validations:
+      required: true
+  - type: input
+    id: epic-ref
+    attributes:
+      label: "Épica"
+      placeholder: "EPIC-01 — Autenticación y Seguridad"
+    validations:
+      required: true
+  - type: textarea
+    id: historia
+    attributes:
+      label: "Historia"
+      description: "Como [rol], quiero [acción] para [beneficio]"
+      placeholder: "Como jugador registrado, quiero..."
+    validations:
+      required: true
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: "Descripción técnica"
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: "Prioridad"
+      options: ["Alta", "Media", "Baja"]
+    validations:
+      required: true
+  - type: input
+    id: story-points
+    attributes:
+      label: "Story Points"
+      placeholder: "5"
+  - type: input
+    id: sprint
+    attributes:
+      label: "Sprint"
+      placeholder: "S1"
+    validations:
+      required: true
+  - type: dropdown
+    id: equipo
+    attributes:
+      label: "Equipo"
+      options: ["Equipo A", "Equipo B", "Equipo C", "Equipo A + B", "Equipo B + C", "Equipo A + C", "All"]
+    validations:
+      required: true
+  - type: checkboxes
+    id: labels
+    attributes:
+      label: "Labels técnicos"
+      options:
+        - label: "Backend"
+        - label: "Frontend"
+        - label: "DB"
+        - label: "Testing"
+        - label: "DevOps"
+        - label: "Deploy"
+  - type: textarea
+    id: checklist
+    attributes:
+      label: "Checklist técnico (Tareas Técnicas)"
+      description: "Lista todas las TT que forman parte de esta historia"
+      placeholder: "- [ ] TT-01-01 Descripción\n- [ ] TT-01-02 Descripción"
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: "Criterios de aceptación"
+      placeholder: "- Criterio verificable 1\n- Criterio verificable 2"
+    validations:
+      required: true
+  - type: input
+    id: rama
+    attributes:
+      label: "Rama Git sugerida"
+      placeholder: "feature/auth-registro-login"
+  - type: input
+    id: depende-de
+    attributes:
+      label: "Depende de (Issue # o HU ID)"
+      placeholder: "HU-01-01, #12"

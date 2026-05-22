@@ -1,0 +1,254 @@
+# project-fields.yml
+# Contrato de estructura del GitHub Project v2 — Codemon TCG
+# Los agentes MCP leen este archivo para conocer los campos disponibles
+# y sus valores válidos antes de crear o actualizar issues.
+
+project:
+  name: "Codemon TCG — Development"
+  description: "Tablero principal de desarrollo del juego de cartas Codemon TCG"
+  visibility: private
+
+fields:
+  - name: Status
+    type: single_select
+    description: "Estado actual del item en el flujo de trabajo"
+    options:
+      - value: Backlog
+        color: "🔵"
+        description: "Definido pero no iniciado"
+      - value: Pendiente
+        color: "⚪"
+        description: "Listo para iniciar, esperando desarrollador"
+      - value: En progreso
+        color: "🟡"
+        description: "Activamente en desarrollo"
+      - value: En revisión
+        color: "🟠"
+        description: "PR abierto, esperando code review"
+      - value: Done
+        color: "🟢"
+        description: "PR mergeado, criterios de aceptación verificados"
+      - value: Blocked
+        color: "🔴"
+        description: "Bloqueado por dependencia o impedimento"
+
+  - name: Priority
+    type: single_select
+    description: "Prioridad de negocio del item"
+    options:
+      - value: Alta
+        color: "🔴"
+      - value: Media
+        color: "🟡"
+      - value: Baja
+        color: "🟢"
+
+  - name: Type
+    type: single_select
+    description: "Tipo de item de trabajo"
+    options:
+      - value: Epic
+        description: "Agrupa historias de usuario por funcionalidad"
+      - value: Historia
+        description: "Unidad de valor entregable (Historia de Usuario)"
+      - value: Bug
+        description: "Error o comportamiento inesperado"
+      - value: Spike
+        description: "Investigación técnica sin entregable directo"
+
+  - name: Epic
+    type: text
+    description: "ID de la épica a la que pertenece este item (ej: EPIC-04)"
+
+  - name: Team
+    type: single_select
+    description: "Equipo responsable"
+    options:
+      - value: "Equipo A"
+        description: "Backend núcleo (Motor, Auth, APIs core)"
+      - value: "Equipo B"
+        description: "Frontend Angular + Tailwind CSS"
+      - value: "Equipo C"
+        description: "Backend auxiliar + DevOps"
+      - value: "All"
+        description: "Responsabilidad compartida entre todos"
+
+  - name: Story Points
+    type: number
+    description: "Estimación en Story Points (escala Fibonacci: 1,2,3,5,8,13,21)"
+
+  - name: Sprint
+    type: iteration
+    description: "Sprint al que pertenece este item"
+    iterations:
+      - title: "S0 — Kickoff"
+        duration: 7
+      - title: "S1 — Auth básica"
+        duration: 7
+      - title: "S2 — Catálogo + Mazos"
+        duration: 7
+      - title: "S3 — Motor: setup + turnos"
+        duration: 7
+      - title: "S4 — Motor: combate"
+        duration: 7
+      - title: "S5 — PvE jugable"
+        duration: 7
+      - title: "S6 — Tablero pulido + Lobby"
+        duration: 7
+      - title: "S7 — PvP en tiempo real"
+        duration: 7
+      - title: "S8 — Tienda + 2FA + métricas"
+        duration: 7
+      - title: "S9 — Social v1"
+        duration: 7
+      - title: "S10 — OAuth + Perfil"
+        duration: 7
+      - title: "S11 — Pulido + bots + E2E"
+        duration: 7
+
+milestones:
+  - title: "S0 — Kickoff"
+    description: "Infraestructura corre y contratos acordados. docker compose up saludable."
+    due_on: "2026-05-24"
+  - title: "S1 — Auth básica"
+    description: "Usuario puede registrarse, loguearse y mantener sesión."
+    due_on: "2026-05-31"
+  - title: "S2 — Catálogo + Mazos"
+    description: "Grid 146 cartas + Deck Builder válido de 60 cartas."
+    due_on: "2026-06-07"
+  - title: "S3 — Motor: setup + turnos"
+    description: "Setup TCG + draw + main phase via API."
+    due_on: "2026-06-14"
+  - title: "S4 — Motor: combate"
+    description: "AttackPipeline + KO + premios completos."
+    due_on: "2026-06-21"
+  - title: "S5 — PvE jugable"
+    description: "UI mínima → bot easy → game over end-to-end."
+    due_on: "2026-06-28"
+  - title: "S6 — Tablero pulido + Lobby"
+    description: "Drag & drop completo + 3 tabs lobby + chat."
+    due_on: "2026-07-05"
+  - title: "S7 — PvP en tiempo real"
+    description: "Sala privada + matchmaking ranked + WebSocket."
+    due_on: "2026-07-12"
+  - title: "S8 — Tienda + 2FA + métricas"
+    description: "MP sandbox + sobres + 2FA + Grafana."
+    due_on: "2026-07-19"
+  - title: "S9 — Social v1"
+    description: "Ligas + amigos + leaderboard + noticias."
+    due_on: "2026-07-26"
+  - title: "S10 — OAuth + Perfil"
+    description: "Google/GitHub + perfil consolidado + wallet history."
+    due_on: "2026-08-02"
+  - title: "S11 — Pulido + bots + E2E"
+    description: "Bot HARD + responsive + Playwright + carga. Demo final."
+    due_on: "2026-08-09"
+
+labels:
+  - name: epic
+    color: "7B68EE"
+    description: "Épica funcional — agrupa historias"
+  - name: historia
+    color: "0075ca"
+    description: "Historia de Usuario"
+  - name: bug
+    color: "d73a4a"
+    description: "Error o comportamiento inesperado"
+  - name: Backend
+    color: "e4e669"
+    description: "Trabajo en Spring Boot / Java"
+  - name: Frontend
+    color: "0052cc"
+    description: "Trabajo en Angular"
+  - name: DB
+    color: "5319e7"
+    description: "Base de datos, migraciones Flyway, vistas"
+  - name: Testing
+    color: "006b75"
+    description: "Tests unitarios, integración, E2E"
+  - name: DevOps
+    color: "e99695"
+    description: "Docker, CI/CD, Nginx, infraestructura"
+  - name: Deploy
+    color: "f9d0c4"
+    description: "Relacionado con despliegue a producción"
+  - name: blocked
+    color: "b60205"
+    description: "Bloqueado por dependencia o impedimento externo"
+  - name: hotfix
+    color: "ff0000"
+    description: "Fix urgente para producción"
+  - name: in-review
+    color: "fbca04"
+    description: "PR abierto, pendiente de code review"
+
+# Convención de nombres de rama
+branch_conventions:
+  feature: "feature/{epic-slug}/{hu-id}-{short-description}"
+  fix: "fix/{issue-number}-{short-description}"
+  hotfix: "hotfix/{issue-number}-{short-description}"
+  epic: "epic/{epic-id-lowercase}"
+  examples:
+    - "feature/auth/hu-01-01-registro-login"
+    - "feature/motor/hu-04-06-attack-pipeline"
+    - "fix/42-deck-validation-error"
+    - "hotfix/99-payment-webhook-crash"
+
+# Instrucciones para agentes MCP
+agent_instructions:
+  read_traceability:
+    description: "Para asociar PASOS locales con HU/TT, epicas e items del Project"
+    steps:
+      - "Leer docs/08-desarrollo-con-ia/TRAZABILIDAD_PASOS_HU.yml como fuente de verdad"
+      - "Usar paso_id para encontrar hu_id, epic_id, hu_issue_number y required_for_hu_done"
+      - "No mover una HU a Done hasta que todos sus pasos requeridos esten DONE"
+      - "Si hu_issue_number es null o github_sync=false, no actualizar GitHub Projects automaticamente"
+
+  read_project_state:
+    description: "Para leer el estado actual del proyecto"
+    steps:
+      - "Usar list_issues con label=historia y state=open para ver HU pendientes"
+      - "Filtrar por campo Sprint para ver qué está en el sprint actual"
+      - "Agrupar por campo Status para el reporte de estado"
+
+  create_issue_from_backlog:
+    description: "Para crear un issue desde el docs/02-planificacion/backlog-master.md"
+    steps:
+      - "Leer el bloque YAML front-matter de la tarjeta en docs/02-planificacion/backlog-master.md"
+      - "Usar create_issue con title=hu-id + nombre, labels=[labels del front-matter]"
+      - "Asignar milestone según el campo sprint del front-matter"
+      - "Agregar al Project y setear campos: Priority, Type, Team, Story Points, Epic, Sprint"
+      - "Linkear al Issue de épica padre agregando referencia en el body"
+
+  move_on_pr_open:
+    description: "Cuando se abre un PR, mover issue a En revisión"
+    steps:
+      - "Extraer issue number del branch name o PR body"
+      - "Usar update_project_item para setear Status=En revisión"
+
+  move_on_pr_merge:
+    description: "Cuando se mergea un PR, cerrar issue y mover a Done"
+    steps:
+      - "Cerrar el issue linkeado con close_issue"
+      - "Setear Status=Done en el Project"
+      - "Verificar si todos los hijos de la épica están Done; si sí, cerrar épica"
+
+  daily_standup_report:
+    description: "Generar reporte diario de estado"
+    query: "list_issues(state=open, labels=historia) grouped by Status field"
+    format: "## Standup {fecha}\n### En progreso\n### En revisión\n### Bloqueados"
+
+# Mapeo de terminología: proyecto → GitHub
+terminology_mapping:
+  "Épica":
+    github_entity: "Issue con label 'epic'"
+    nota: "NO usar Milestone para épicas"
+  "Sprint":
+    github_entity: "Milestone de GitHub (S0, S1, ... S11)"
+    nota: "Cada sprint es un Milestone con due date"
+  "Historia de Usuario":
+    github_entity: "Issue hijo con label 'historia', linked al issue de épica"
+    nota: "El issue referencia al issue de épica en el body"
+  "Tarea Técnica":
+    github_entity: "Checklist dentro del Issue de su HU"
+    nota: "NO crear issue separado para TT; son items de checklist en la HU"

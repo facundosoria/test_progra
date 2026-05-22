@@ -1,0 +1,79 @@
+name: "Tarea Técnica (standalone)"
+description: "Tarea técnica que no pertenece a una HU específica (infra, DevOps, calidad transversal)"
+title: "[TT-XX-YY] Descripción de la tarea"
+labels: ["tarea-tecnica"]
+body:
+  - type: input
+    id: tt-id
+    attributes:
+      label: ID de la Tarea Técnica
+      description: "Identificador único (ej: TT-10-05)"
+      placeholder: "TT-XX-YY"
+    validations:
+      required: true
+
+  - type: input
+    id: epic-id
+    attributes:
+      label: Épica
+      description: "ID de la épica a la que pertenece (ej: EPIC-10)"
+      placeholder: "EPIC-XX"
+    validations:
+      required: true
+
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint
+      description: "Sprint donde se ejecuta esta tarea (ej: S0)"
+      placeholder: "SX"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: equipo
+    attributes:
+      label: Equipo responsable
+      description: "Equipo que ejecuta la tarea"
+      options:
+        - "Equipo A — Backend Core"
+        - "Equipo B — Frontend"
+        - "Equipo C — DevOps + Backend Aux"
+        - "All"
+    validations:
+      required: true
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción
+      description: "Qué hay que hacer y por qué es necesario"
+      placeholder: "Esta tarea configura/implementa..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Pasos técnicos (checklist)
+      description: "Pasos concretos de implementación"
+      placeholder: |
+        - [ ] Paso 1
+        - [ ] Paso 2
+        - [ ] Paso 3
+      value: |
+        - [ ] Paso 1
+        - [ ] Paso 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de Aceptación
+      description: "Cómo verificar que la tarea está completa"
+      placeholder: |
+        - El servicio levanta correctamente
+        - Los tests pasan en CI
+    validations:
+      required: true

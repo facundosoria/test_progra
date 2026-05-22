@@ -1,0 +1,248 @@
+services:
+
+  # ─────────────────────────────────────────
+  # APLICACIÓN
+  # ─────────────────────────────────────────
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: codemon_api
+    restart: unless-stopped
+    # Puerto 8080 NO expuesto públicamente — acceso solo vía gateway Nginx en localhost:8088
+    # Para debug directo: descomentar la línea siguiente
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-codemon_db}
+      DB_USER: ${DB_USER:-codemon_user}
+      DB_PASSWORD: ${DB_PASSWORD:-codemon_pass}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USER: ${MINIO_USER:-codemon}
+      MINIO_PASSWORD: ${MINIO_PASSWORD:-codemon123}
+      MINIO_BUCKET: ${MINIO_BUCKET:-codemon-cards}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:8088/minio}
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_cambiar_en_prod_min32chars}
+      JWT_EXPIRY_MS: ${JWT_EXPIRY_MS:-900000}
+      REFRESH_TOKEN_EXPIRY_MS: ${REFRESH_TOKEN_EXPIRY_MS:-604800000}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-smtp.gmail.com}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      EMAIL_USERNAME: ${EMAIL_USERNAME:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
+      MP_SANDBOX: ${MP_SANDBOX:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8088}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 5
+    networks:
+      - codemon_net
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: codemon_front
+    restart: unless-stopped
+    # Gateway único: toda la app accesible desde http://localhost:8088
+    ports:
+      - "8088:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # NOTA: usar 127.0.0.1 en lugar de localhost para evitar resolución IPv6 (::1)
+      # dentro del contenedor, que causa unhealthy aunque la app responda correctamente.
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - codemon_net
+
+  # ─────────────────────────────────────────
+  # BASE DE DATOS
+  # ─────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: codemon_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-codemon_db}
+      POSTGRES_USER:     ${DB_USER:-codemon_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-codemon_pass}
+    # Puerto 5433 local para tooling (DBeaver, psql), evita conflicto con Postgres local
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-codemon_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codemon_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: codemon_redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+      - --save
+      - "900 1"
+      - --save
+      - "300 10"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codemon_net
+
+  # ─────────────────────────────────────────
+  # ALMACENAMIENTO DE IMÁGENES
+  # ─────────────────────────────────────────
+
+  minio:
+    image: minio/minio:RELEASE.2024-09-22T00-33-43Z
+    container_name: codemon_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_USER:-codemon}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-codemon123}
+    # Puerto 9000 NO expuesto — imágenes accesibles vía gateway en /minio/*
+    # Puerto 9001 (consola admin) solo en loopback local
+    ports:
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codemon_net
+
+  minio_setup:
+    image: minio/mc:RELEASE.2024-09-16T17-22-28Z
+    container_name: codemon_minio_setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 ${MINIO_USER:-codemon} ${MINIO_PASSWORD:-codemon123};
+      /usr/bin/mc mb --ignore-existing local/codemon-cards;
+      /usr/bin/mc anonymous set download local/codemon-cards;
+      echo 'MinIO bucket listo.';
+      exit 0;
+      "
+    networks:
+      - codemon_net
+
+  # ─────────────────────────────────────────
+  # MONITOREO
+  # ─────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: codemon_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - codemon_net
+    depends_on:
+      api:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: codemon_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-codemon123}
+      GF_USERS_ALLOW_SIGN_UP:     "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - codemon_net
+    depends_on:
+      - prometheus
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: codemon_postgres_exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER:-codemon_user}:${DB_PASSWORD:-codemon_pass}@postgres:5432/${DB_NAME:-codemon_db}?sslmode=disable"
+    networks:
+      - codemon_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis_exporter:
+    image: oliver006/redis_exporter:v1.62.0
+    container_name: codemon_redis_exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    networks:
+      - codemon_net
+    depends_on:
+      redis:
+        condition: service_healthy
+
+# ─────────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  codemon_net:
+    driver: bridge
