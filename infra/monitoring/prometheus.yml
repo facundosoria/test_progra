@@ -9,7 +9,7 @@ scrape_configs:
   # API Spring Boot
   # IMPORTANTE: dentro de Docker usar el nombre del servicio "api", no "localhost"
   - job_name: 'codemon-api'
-    metrics_path: '/actuator/prometheus'
+    metrics_path: '/api/actuator/prometheus'
     static_configs:
       - targets: ['api:8080']
         labels:

@@ -1,5 +1,7 @@
 server:
   port: 8080
+  servlet:
+    context-path: /api
   forward-headers-strategy: native
 
 spring:
@@ -64,6 +66,9 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+  health:
+    mail:
+      enabled: false
 
 springdoc:
   api-docs:
