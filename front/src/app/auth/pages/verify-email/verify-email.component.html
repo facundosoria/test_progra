@@ -1,0 +1,60 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-text">Codemon TCG</span>
+    </div>
+
+    <h2 class="auth-title">Verificar email</h2>
+
+    <p class="auth-subtitle" *ngIf="email">
+      Enviamos un código a <strong>{{ email }}</strong>
+    </p>
+    <p class="auth-subtitle" *ngIf="!email">
+      Ingresá el código de 6 dígitos que enviamos a tu email.
+    </p>
+
+    <div *ngIf="errorMessage" class="auth-error">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="auth-success">{{ successMessage }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-field">
+        <label for="code">Código de verificación</label>
+        <input
+          id="code"
+          type="text"
+          inputmode="numeric"
+          formControlName="code"
+          placeholder="123456"
+          maxlength="6"
+          [class.invalid]="code.invalid && code.touched"
+          autocomplete="one-time-code"
+        />
+        <span class="field-error" *ngIf="code.invalid && code.touched">
+          <span *ngIf="code.errors?.['required']">El código es requerido.</span>
+          <span *ngIf="code.errors?.['pattern']">El código debe ser de 6 dígitos.</span>
+        </span>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">Verificar</span>
+        <span *ngIf="loading">Verificando...</span>
+      </button>
+    </form>
+
+    <div class="resend-wrap">
+      <button
+        class="btn-resend"
+        (click)="onResend()"
+        [disabled]="countdown > 0 || resending"
+      >
+        <span *ngIf="countdown > 0">Reenviar en {{ countdown }}s</span>
+        <span *ngIf="countdown === 0 && !resending">Reenviar código</span>
+        <span *ngIf="resending">Reenviando...</span>
+      </button>
+    </div>
+
+    <p class="auth-link">
+      <a routerLink="/auth/login">Volver al inicio de sesión</a>
+    </p>
+  </div>
+</div>
