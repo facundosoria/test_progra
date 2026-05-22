@@ -94,7 +94,7 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 | PASO_S00_06 | TT-10-03 | pendiente | EPIC-10 | Si | DONE | B | 100% | Codex | develop | - | Tailwind CSS 3 + STOMP + Lucide + FA instalados; environments creados; estructura de features lista |
 | PASO_S00_07 | TT-10-05 | pendiente | EPIC-10 | Si | DONE | C | 100% | Codex | develop | - | 10/10 smoke tests PASS — GATE 0 desbloqueado |
 | PASO_S00_SMOKE | sin HU directa | pendiente | EPIC-10 | No | DONE | ALL | 100% | Codex | develop | - | GATE 0 PASS: gateway, API health, ping, PG, Redis, MinIO, Prometheus, Grafana, tablas, Swagger |
-| PASO_S01_01 | HU-01-01<br>HU-01-03<br>HU-01-04<br>HU-01-05 | pendiente | EPIC-01 | Si | READY | A | 0% | - | develop | - | Implementar auth backend |
+| PASO_S01_01 | HU-01-01<br>HU-01-03<br>HU-01-04<br>HU-01-05 | pendiente | EPIC-01 | Si | DONE | A | 100% | Codex | develop | - | Auth backend: JWT, BCrypt, register/login/refresh/logout/me, 11 unit tests |
 | PASO_S01_02 | HU-01-01<br>HU-01-02<br>HU-01-03<br>HU-01-05 | pendiente | EPIC-01 | Si | READY | B | 0% | - | develop | - | Implementar auth UI con mocks/back real |
 | PASO_S01_03 | HU-01-04 | pendiente | EPIC-01 | Si | TODO | B | 0% | - | - | Depende de PASO_S01_02 | Implementar app shell y guards |
 | PASO_S02_01 | HU-03-03 | pendiente | EPIC-03 | Si | TODO | A | 0% | - | - | Depende de PASO_S00_05 | Implementar validacion de mazos |
@@ -122,7 +122,7 @@ Cuando esta seccion se actualice, agregar tambien una entrada en [HISTORIAL_PASO
 | PASO_S07_SMOKE | sin HU directa | pendiente | - | No | TODO | ALL | 0% | - | - | Depende de S07 completo | Ejecutar GATE 3/4 PvP |
 | PASO_S08_01 | HU-02-04<br>HU-07-03<br>HU-07-04<br>HU-07-05 | pendiente | EPIC-02<br>EPIC-07 | Si | TODO | C | 0% | - | - | Depende de PASO_S02_02/PASO_S01_01/PASO_S00_03 | Implementar sobres y coleccion |
 | PASO_S08_02 | HU-02-05<br>HU-09-05<br>HU-09-06 | pendiente | EPIC-02<br>EPIC-09 | Si | TODO | C | 0% | - | - | Depende de PASO_S08_01 | Implementar stats/leaderboard base |
-| PASO_S08_03 | HU-01-02<br>HU-01-06 | pendiente | EPIC-01 | Si | TODO | C | 0% | - | - | Depende de PASO_S01_01 — marcar READY cuando S01_01 este DONE | Implementar email/2FA |
+| PASO_S08_03 | HU-01-02<br>HU-01-06 | pendiente | EPIC-01 | Si | READY | C | 0% | - | - | Depende de PASO_S01_01 ✓ | Implementar email/2FA |
 | PASO_S08_04 | HU-07-01<br>HU-07-02<br>HU-07-06 | pendiente | EPIC-07 | Si | TODO | C | 0% | - | - | Depende de PASO_S08_01/PASO_S01_01 | Implementar Mercado Pago y wallet |
 | PASO_S08_05 | TT-10-12 | pendiente | EPIC-10 | Si | TODO | C | 0% | - | - | Depende de infra y servicios metricados | Implementar Prometheus/Grafana |
 | PASO_S08_06 | HU-07-01<br>HU-07-03<br>HU-07-04<br>HU-07-05 | pendiente | EPIC-07 | Si | TODO | B | 0% | - | - | Depende de PASO_S06_01/PASO_S08_04 | Implementar shop UI |
